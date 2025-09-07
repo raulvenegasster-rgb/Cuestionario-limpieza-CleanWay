@@ -63,17 +63,26 @@ export default function App() {
   return (
     <div className='min-h-screen bg-neutral-50 text-neutral-800'>
       <div className='max-w-4xl mx-auto p-6'>
-        <header className='mb-6 flex items-center justify-between'>
-          <div>
-            <h1 className='text-2xl font-semibold tracking-tight'>Cuestionario de Transporte</h1>
-            <p className='text-sm text-neutral-500'>Puntaje por pregunta: Sí = 2, Parcial = 1, No = 0. Total máximo 24.</p>
-          </div>
-          <div className='flex gap-2 print:hidden'>
-            <button onClick={reiniciar} className='px-3 py-2 rounded-xl bg-white shadow border hover:bg-neutral-50'>Reiniciar</button>
-            <button onClick={exportarCSV} className='px-3 py-2 rounded-xl bg-white shadow border hover:bg-neutral-50'>Exportar CSV</button>
-            <button onClick={imprimir} className='px-3 py-2 rounded-xl bg-black text-white shadow'>Imprimir / PDF</button>
-          </div>
-        </header>
+      <header className="mb-6">
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      {/* Logo Grupo Quokka */}
+      <img src="/quokka-logo.png" alt="Grupo Quokka" className="h-10 sm:h-12" />
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Cuestionario de Transporte</h1>
+        <p className="text-sm text-neutral-500">
+          Puntaje por pregunta: Sí = 2, Parcial = 1, No = 0. Total máximo 24.
+        </p>
+      </div>
+    </div>
+    <div className="flex gap-2 print:hidden">
+      <button onClick={reiniciar} className="px-3 py-2 rounded-xl bg-white shadow border hover:bg-neutral-50">Reiniciar</button>
+      <button onClick={exportarCSV} className="px-3 py-2 rounded-xl bg-white shadow border hover:bg-neutral-50">Exportar CSV</button>
+      <button onClick={imprimir} className="px-3 py-2 rounded-xl bg-black text-white shadow">Imprimir / PDF</button>
+    </div>
+  </div>
+</header>
+
 
         <div className='grid gap-4'>
           {preguntas.map((p, idx) => (
