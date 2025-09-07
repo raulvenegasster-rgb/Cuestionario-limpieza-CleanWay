@@ -46,7 +46,7 @@ export default function App() {
   function exportarCSV() {
     const encabezados = ['Pregunta', 'Respuesta(2=Sí,1=Parcial,0=No)']
     const filas = preguntas.map(p => [
-      p.texto.replaceAll(';', ','),
+      p.texto.replace(/;/g, ","),
       String(respuestas[p.id] ?? 0),
     ])
     filas.push(['TOTAL', String(total)])
