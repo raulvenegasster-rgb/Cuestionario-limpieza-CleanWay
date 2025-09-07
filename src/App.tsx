@@ -19,7 +19,7 @@ const preguntas: Pregunta[] = [
 ]
 
 function rango(total: number) {
-  if (total <= 11) return { etiqueta: '❌ Revisa tu servicio de transporte.', tono: 'text-red-600', bg: 'bg-red-50', badge: 'Bajo' }
+  if (total <= 11) return { etiqueta: '❌ Necesitas revisar tu servicio de transporte, recuerda que es parte fundamental para el buen desempeño de tu plantilla y esto puede influir en la rotación de personal.', tono: 'text-red-600', bg: 'bg-red-50', badge: 'Bajo' }
   if (total <= 18) return { etiqueta: '⚠️ Hay cosas que mejorar.', tono: 'text-yellow-700', bg: 'bg-yellow-50', badge: 'Medio' }
   return { etiqueta: '🚍 Tienes un transporte de personal sólido.', tono: 'text-green-700', bg: 'bg-green-50', badge: 'Alto' }
 }
