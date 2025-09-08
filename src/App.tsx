@@ -145,7 +145,7 @@ export default function App() {
         </section>
 
         <footer className='mt-8 text-center text-xs text-neutral-400 print:hidden'>
-          Hecho para Grupo Quokka. Puedes incrustarlo en tu web o compartir el enlace.
+          Desarrollado por Raúl Venegas para Grupo Quokka, los expertos en servicios para la Industria.
         </footer>
       </div>
 
