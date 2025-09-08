@@ -69,9 +69,9 @@ export default function App() {
       {/* Logo Grupo Quokka */}
       <img src="/quokka-logo.png" alt="Grupo Quokka" className="h-10 sm:h-12" />
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Cuestionario de Transporte</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">¿Que tan bueno es tu proveedor de transporte?</h1>
         <p className="text-sm text-neutral-500">
-          Puntaje por pregunta: Sí = 2, Parcial = 1, No = 0. Total máximo 24.
+         Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test.
         </p>
       </div>
     </div>
