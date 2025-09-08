@@ -71,7 +71,7 @@ export default function App() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">¿Que tan bueno es tu proveedor de transporte?</h1>
         <p className="text-sm text-neutral-500">
-         Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test.
+         Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test
         </p>
       </div>
     </div>
