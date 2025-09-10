@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react'
 
 type Pregunta = { id: number; texto: string }
@@ -19,8 +18,16 @@ const preguntas: Pregunta[] = [
 ]
 
 function rango(total: number) {
-  if (total <= 11) return { etiqueta: '❌ Necesitas revisar tu servicio de transporte, recuerda que es parte fundamental para el buen desempeño de tu plantilla y esto puede influir en la rotación de personal.', tono: 'text-red-600', bg: 'bg-red-50', badge: 'Bajo' }
-  if (total <= 18) return { etiqueta: '⚠️ Hay cosas que mejorar.', tono: 'text-yellow-700', bg: 'bg-yellow-50', badge: 'Medio' }
+  if (total <= 11)
+    return {
+      etiqueta:
+        '❌ Necesitas revisar tu servicio de transporte, recuerda que es parte fundamental para el buen desempeño de tu plantilla y esto puede influir en la rotación de personal.',
+      tono: 'text-red-600',
+      bg: 'bg-red-50',
+      badge: 'Bajo',
+    }
+  if (total <= 18)
+    return { etiqueta: '⚠️ Hay cosas que mejorar.', tono: 'text-yellow-700', bg: 'bg-yellow-50', badge: 'Medio' }
   return { etiqueta: '🚍 Tienes un transporte de personal sólido.', tono: 'text-green-700', bg: 'bg-green-50', badge: 'Alto' }
 }
 
@@ -28,7 +35,9 @@ export default function App() {
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({})
 
   const total = useMemo(() => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0), [respuestas])
-  const faltantes = useMemo(() => preguntas.filter(p => respuestas[p.id] === undefined || respuestas[p.id] === null).length, [respuestas])
+  const faltantes = useMemo(() => preguntas.filter(p => respuestas[p.id] === undefined || respuestas[p.id] === null).length, [
+    respuestas,
+  ])
   const r = rango(total)
 
   function setValor(id: number, val: number) {
@@ -46,7 +55,7 @@ export default function App() {
   function exportarCSV() {
     const encabezados = ['Pregunta', 'Respuesta(2=Sí,1=Parcial,0=No)']
     const filas = preguntas.map(p => [
-      p.texto.replace(/;/g, ","),
+      p.texto.replace(/;/g, ','),
       String(respuestas[p.id] ?? 0),
     ])
     filas.push(['TOTAL', String(total)])
@@ -63,35 +72,42 @@ export default function App() {
   return (
     <div className='min-h-screen bg-neutral-50 text-neutral-800'>
       <div className='max-w-4xl mx-auto p-6'>
-   <div className="min-h-screen bg-[url('/Fondo.png')] bg-cover bg-center text-neutral-800">
-  {/* resto del contenido */}
-</div>
-  <div className="flex items-center justify-between">
-    <div className="flex items-center gap-3">
-      {/* Logo Grupo Quokka */}
-      <img src="/quokka-logo.png" alt="Grupo Quokka" className="h-10 sm:h-12" />
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">¿Que tan bueno es tu proveedor de transporte?</h1>
-        <p className="text-sm text-neutral-500">
-         ¡Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test!
-        </p>
-      </div>
-    </div>
-    <div className="flex gap-2 print:hidden">
-      <button onClick={reiniciar} className="px-3 py-2 rounded-xl bg-white shadow border hover:bg-neutral-50">Reiniciar</button>
-      <button onClick={exportarCSV} className="px-3 py-2 rounded-xl bg-white shadow border hover:bg-neutral-50">Exportar CSV</button>
-      <button onClick={imprimir} className="px-3 py-2 rounded-xl bg-black text-white shadow">Imprimir / PDF</button>
-    </div>
-  </div>
-</header>
-
+        <header className='mb-6'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-3'>
+              {/* Logo Grupo Quokka */}
+              <img src='/quokka-logo.png' alt='Grupo Quokka' className='h-10 sm:h-12' />
+              <div>
+                <h1 className='text-2xl font-semibold tracking-tight'>
+                  ¿Que tan bueno es tu proveedor de transporte?
+                </h1>
+                <p className='text-sm text-neutral-500'>
+                  ¡Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test!
+                </p>
+              </div>
+            </div>
+            <div className='flex gap-2 print:hidden'>
+              <button onClick={reiniciar} className='px-3 py-2 rounded-xl bg-white shadow border hover:bg-neutral-50'>
+                Reiniciar
+              </button>
+              <button onClick={exportarCSV} className='px-3 py-2 rounded-xl bg-white shadow border hover:bg-neutral-50'>
+                Exportar CSV
+              </button>
+              <button onClick={imprimir} className='px-3 py-2 rounded-xl bg-black text-white shadow'>
+                Imprimir / PDF
+              </button>
+            </div>
+          </div>
+        </header>
 
         <div className='grid gap-4'>
           {preguntas.map((p, idx) => (
             <div key={p.id} className='bg-white rounded-2xl shadow p-4 border'>
               <div className='flex items-start justify-between gap-4'>
-                <div className='font-medium'>{idx + 1}. {p.texto}</div>
-                <div className='shrink-0 text-sm text-neutral-500'>Valor: {(respuestas[p.id] ?? 0)}</div>
+                <div className='font-medium'>
+                  {idx + 1}. {p.texto}
+                </div>
+                <div className='shrink-0 text-sm text-neutral-500'>Valor: {respuestas[p.id] ?? 0}</div>
               </div>
               <div className='mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2'>
                 <label className='flex items-center gap-2 cursor-pointer'>
@@ -141,7 +157,9 @@ export default function App() {
               <span className='text-xs px-2 py-1 rounded-full bg-white border shadow-sm'>{r.badge}</span>
             </div>
             {faltantes > 0 && (
-              <p className='mt-2 text-xs text-neutral-500'>Faltan {faltantes} pregunta(s) por responder. Las no respondidas cuentan como 0.</p>
+              <p className='mt-2 text-xs text-neutral-500'>
+                Faltan {faltantes} pregunta(s) por responder. Las no respondidas cuentan como 0.
+              </p>
             )}
           </div>
         </section>
