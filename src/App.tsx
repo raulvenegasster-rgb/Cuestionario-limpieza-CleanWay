@@ -63,7 +63,7 @@ export default function App() {
   return (
     <div className='min-h-screen bg-neutral-50 text-neutral-800'>
       <div className='max-w-4xl mx-auto p-6'>
-   <div className="min-h-screen bg-[url('/fondo.png')] bg-cover bg-center text-neutral-800">
+   <div className="min-h-screen bg-[url('/Fondo.png')] bg-cover bg-center text-neutral-800">
   {/* resto del contenido */}
 </div>
   <div className="flex items-center justify-between">
