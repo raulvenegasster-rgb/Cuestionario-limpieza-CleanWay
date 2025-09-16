@@ -76,8 +76,7 @@ export default function App() {
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
 
   const total = useMemo(
-    () =>
-      preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
+    () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
     [respuestas]
   );
 
@@ -88,35 +87,74 @@ export default function App() {
   const data = rango(total);
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-bold">Cuestionario de transporte</h1>
+    <main className="min-h-screen bg-neutral-50 text-neutral-900">
+      <div className="relative">
+        {/* Fondo con la foto y un velo para contraste */}
+        <div
+          className="absolute inset-0 bg-[url('/bg-bus.jpg')] bg-cover bg-center opacity-15"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/85 to-white/95"
+          aria-hidden="true"
+        />
 
-      <div className="mt-6 space-y-4">
-        {preguntas.map(p => (
-          <div key={p.id} className="border-b pb-4">
-            <p className="font-medium">{p.id}. {p.texto}</p>
-            <div className="mt-2 flex gap-6">
-              {[{ label: "Si", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map(opt => (
-                <label key={opt.val} className="inline-flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name={`p-${p.id}`}
-                    value={opt.val}
-                    checked={respuestas[p.id] === opt.val}
-                    onChange={() => setValor(p.id, opt.val)}
-                  />
-                  <span>{opt.label}</span>
-                </label>
-              ))}
+        <div className="relative mx-auto max-w-5xl p-6">
+          {/* Header con logo + títulos */}
+          <header className="mb-6 flex items-start justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <img
+                src="/quokka-logo.png"
+                alt="Grupo Quokka"
+                className="h-10 sm:h-12"
+              />
+              <div>
+                <h1 className="text-3xl font-bold leading-tight">
+                  ¿Qué tan bueno es tu proveedor de transporte?
+                </h1>
+                <p className="text-neutral-500">
+                  ¡Encuentra las debilidades y fortalezas de tu servicio de transporte
+                  con este sencillo test!
+                </p>
+              </div>
             </div>
+          </header>
+
+          {/* Preguntas en tarjetas semitransparentes */}
+          <div className="space-y-4">
+            {preguntas.map(p => (
+              <div
+                key={p.id}
+                className="rounded-2xl border border-neutral-200/70 bg-white/70 backdrop-blur-md p-4 shadow-sm"
+              >
+                <p className="font-medium">
+                  {p.id}. {p.texto}
+                </p>
+                <div className="mt-2 flex gap-6 text-neutral-800">
+                  {[{ label: 'Sí', val: 2 }, { label: 'Parcial', val: 1 }, { label: 'No', val: 0 }].map(
+                    opt => (
+                      <label key={opt.val} className="inline-flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name={`p-${p.id}`}
+                          value={opt.val}
+                          checked={respuestas[p.id] === opt.val}
+                          onChange={() => setValor(p.id, opt.val)}
+                        />
+                        <span>{opt.label}</span>
+                      </label>
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+
+          {/* Total + panel de resultado */}
+          <div className="mt-6 text-lg font-bold">TOTAL: {total}</div>
+          <ResultadoPanel data={data} />
+        </div>
       </div>
-
-      <div className="mt-6 text-lg font-bold">TOTAL: {total}</div>
-
-      <ResultadoPanel data={data} />
     </main>
   );
 }
-
