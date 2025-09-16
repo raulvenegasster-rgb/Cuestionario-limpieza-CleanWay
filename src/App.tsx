@@ -21,8 +21,8 @@ function type Rango = {
   badge: 'Muy pobre' | 'Mejorable' | 'Sólido';
   tono: string;
   bg: string;
-  heading: string;   // línea 2 (negritas)
-  detail: string;    // línea 3 (párrafo)
+  heading: string; // línea en negritas
+  detail: string;  // párrafo largo
 };
 
 function rango(total: number): Rango {
@@ -52,9 +52,8 @@ function rango(total: number): Rango {
     bg: 'bg-emerald-50',
     heading: '🚍 Tienes un transporte de personal sólido.',
     detail:
-      'La puntuación obtenida (19–24/24) evidencia un nivel alto de cumplimiento en puntualidad por ruta, cobertura de turnos, protocolos de contingencia, mantenimiento y seguridad de unidades, además de esquemas claros de escalación y atención ejecutiva. La operación cuenta con trazabilidad y reportes suficientes para asegurar continuidad y mejora continua.'
-  };
-}
+      'La puntuación obtenida (19–24/24) evidencia un nivel alto de cumplimiento en puntualidad por ruta, cobertura de turnos, protocolos de contingencia, mantenimiento y seguridad de unidades, además de esquemas claros de escalación y atención ejecutiva. La operación cuenta con trazabilidad y reportes sufic
+
 
 export default function App() {
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({})
