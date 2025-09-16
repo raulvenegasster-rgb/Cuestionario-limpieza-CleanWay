@@ -21,39 +21,44 @@ function type Rango = {
   badge: 'Muy pobre' | 'Mejorable' | 'Sólido';
   tono: string;
   bg: string;
-  heading: string; // línea en negritas
-  detail: string;  // párrafo largo
+  heading: string;  // línea 2 (negritas)
+  detail: string;   // párrafo largo
 };
 
-function rango(total: number): Rango {
-  if (total <= 11) {
-    return {
-      badge: 'Muy pobre',
-      tono: 'text-red-700',
-      bg: 'bg-red-50',
-      heading: '❌ Necesitas revisar tu servicio de transporte.',
-      detail:
-        'La puntuación obtenida indica incumplimientos recurrentes en puntualidad por ruta/unidad, cobertura de turnos, protocolos de contingencia y control operativo. Persistir con este nivel de servicio impacta el estado de ánimo desde el abordaje, reduce el desempeño en turno, eleva costos (horas extra, reprocesos) y expone a la empresa a riesgos de seguridad y reputacionales. Se requiere un plan inmediato de estabilización con responsables, métricas y fechas de cierre.'
-    };
-  }
-  if (total <= 18) {
-    return {
-      badge: 'Mejorable',
-      tono: 'text-amber-700',
-      bg: 'bg-amber-50',
-      heading: '⚠️ Hay cosas que mejorar.',
-      detail:
-        'La evaluación (12–18/24) evidencia brechas en confiabilidad operativa y control del servicio: puntualidad por ruta/unidad variable, cobertura incompleta y protocolos de contingencia poco robustos. Mantener estas brechas incrementa tardanzas y ausentismo, afecta el estado de ánimo desde el abordaje, reduce desempeño y eleva costos (horas extra, reprocesos), además de riesgos de seguridad y reputacionales. Corregir de inmediato estabiliza el servicio y mejora la experiencia laboral desde el primer kilómetro.'
-    };
-  }
-  return {
+// Textos cerrados y sin comillas “curvas”
+const textos = {
+  bajo: {
+    badge: 'Muy pobre',
+    tono: 'text-red-700',
+    bg: 'bg-red-50',
+    heading: '❌ Necesitas revisar tu servicio de transporte.',
+    detail:
+      'La puntuación obtenida indica incumplimientos recurrentes en puntualidad por ruta/unidad, cobertura de turnos, protocolos de contingencia y control operativo. Persistir con este nivel de servicio impacta el estado de ánimo desde el abordaje, reduce el desempeño en turno, eleva costos (horas extra, reprocesos) y expone a la empresa a riesgos de seguridad y reputacionales. Se requiere un plan inmediato de estabilización con responsables, métricas y fechas de cierre.',
+  },
+  medio: {
+    badge: 'Mejorable',
+    tono: 'text-amber-700',
+    bg: 'bg-amber-50',
+    heading: '⚠️ Hay cosas que mejorar.',
+    detail:
+      'La evaluación (12–18/24) evidencia brechas en confiabilidad operativa y control del servicio: puntualidad por ruta/unidad variable, cobertura incompleta y protocolos de contingencia poco robustos. Mantener estas brechas incrementa tardanzas y ausentismo, afecta el estado de ánimo desde el abordaje, reduce desempeño y eleva costos (horas extra, reprocesos), además de riesgos de seguridad y reputacionales. Corregir de inmediato estabiliza el servicio y mejora la experiencia laboral desde el primer kilómetro.',
+  },
+  alto: {
     badge: 'Sólido',
     tono: 'text-emerald-700',
     bg: 'bg-emerald-50',
     heading: '🚍 Tienes un transporte de personal sólido.',
     detail:
-      'La puntuación obtenida (19–24/24) evidencia un nivel alto de cumplimiento en puntualidad por ruta, cobertura de turnos, protocolos de contingencia, mantenimiento y seguridad de unidades, además de esquemas claros de escalación y atención ejecutiva. La operación cuenta con trazabilidad y reportes sufic
+      'La puntuación obtenida (19–24/24) evidencia un nivel alto de cumplimiento en puntualidad por ruta, cobertura de turnos, protocolos de contingencia, mantenimiento y seguridad de unidades, además de esquemas claros de escalación y atención ejecutiva. La operación cuenta con trazabilidad y reportes suficientes para asegurar continuidad y mejora continua.',
+  },
+} as const;
 
+// ↓↓↓ esta es la única función que debes exponer/usar
+function rango(total: number): Rango {
+  if (total <= 11) return textos.bajo;
+  if (total <= 18) return textos.medio;
+  return textos.alto;
+}
 
 export default function App() {
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({})
