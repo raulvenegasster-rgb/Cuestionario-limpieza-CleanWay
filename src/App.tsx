@@ -1,204 +1,122 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from "react";
 
-type Pregunta = { id: number; texto: string }
-
-const preguntas: Pregunta[] = [
-  { id: 1, texto: '¿Recibes reportes de puntualidad por ruta y unidad con indicadores claros?' },
-  { id: 2, texto: '¿Tu proveedor garantiza al menos un 90% de cumplimiento en horarios?' },
-  { id: 3, texto: '¿Tus empleados viajan en unidades recientes, con clima funcionando y mantenimiento preventivo al día?' },
-  { id: 4, texto: '¿Te consta que los choferes cuentan con capacitación en manejo defensivo y protocolos de seguridad?' },
-  { id: 5, texto: 'Imagina un empleado con una hora de traslado diario; ¿las unidades ofrecen comodidad suficiente para que llegue con buen ánimo y energía?' },
-  { id: 6, texto: '¿Tu proveedor entiende que el transporte influye en la rotación y el compromiso del personal?' },
-  { id: 7, texto: '¿Tienes certeza de que, si falla una unidad, recibirás reposición inmediata?' },
-  { id: 8, texto: '¿Existen protocolos probados para incidentes en ruta o bloqueo?' },
-  { id: 9, texto: '¿Puedes contactar a más de una persona responsable en caso de incidencia?' },
-  { id: 10, texto: '¿Tu proveedor tiene 3 niveles de escalación (operador, coordinador, dirección) para resolver rápido?' },
-  { id: 11, texto: '¿Cuentas con acceso a monitoreo en tiempo real de tus unidades?' },
-  { id: 12, texto: '¿Puedes saber quién subió y quién no a cada unidad al inicio del turno?' },
-]
-
-function type Rango = {
-  badge: 'Muy pobre' | 'Mejorable' | 'Sólido';
+type Rango = {
+  badge: "Muy pobre" | "Mejorable" | "Sólido";
   tono: string;
   bg: string;
-  heading: string;  // línea 2 (negritas)
-  detail: string;   // párrafo largo
+  heading: string; // línea en negritas
+  detail: string;  // párrafo largo
 };
 
-// Textos cerrados y sin comillas “curvas”
+const preguntas: { id: number; texto: string }[] = [
+  { id: 1, texto: "¿Recibes reportes de puntualidad por ruta y unidad con indicadores claros?" },
+  { id: 2, texto: "¿Tu proveedor garantiza al menos un 95% de cumplimiento en horarios?" },
+  { id: 3, texto: "¿Tus empleados viajan en unidades recientes, con clima y mantenimiento preventivo al día?" },
+  { id: 4, texto: "¿Los choferes cuentan con capacitación en manejo defensivo y protocolos de seguridad?" },
+  { id: 5, texto: "¿Las unidades ofrecen comodidad suficiente para llegadas con buen ánimo y energía?" },
+  { id: 6, texto: "¿El proveedor entiende que el transporte influye en la rotación y el compromiso del personal?" },
+  { id: 7, texto: "¿Si falla una unidad, recibes reposición inmediata?" },
+  { id: 8, texto: "¿Existen protocolos probados para incidentes en ruta o bloqueos?" },
+  { id: 9, texto: "¿Puedes contactar a más de una persona responsable en caso de incidencia?" },
+  { id: 10, texto: "¿Hay tres niveles de escalación (operador, coordinador, dirección) para resolver rápido?" },
+  { id: 11, texto: "¿Cuentas con acceso a monitoreo en tiempo real de tus unidades?" },
+  { id: 12, texto: "¿Puedes saber quién subió y quién no al inicio del turno?" }
+];
+
+// Textos y estilos por rango (ASCII puro)
 const textos = {
   bajo: {
-    badge: 'Muy pobre',
-    tono: 'text-red-700',
-    bg: 'bg-red-50',
-    heading: '❌ Necesitas revisar tu servicio de transporte.',
+    badge: "Muy pobre",
+    tono: "text-red-700",
+    bg: "bg-red-50",
+    heading: "Necesitas revisar tu servicio de transporte.",
     detail:
-      'La puntuación obtenida indica incumplimientos recurrentes en puntualidad por ruta/unidad, cobertura de turnos, protocolos de contingencia y control operativo. Persistir con este nivel de servicio impacta el estado de ánimo desde el abordaje, reduce el desempeño en turno, eleva costos (horas extra, reprocesos) y expone a la empresa a riesgos de seguridad y reputacionales. Se requiere un plan inmediato de estabilización con responsables, métricas y fechas de cierre.',
+      "La puntuacion obtenida indica incumplimientos recurrentes en puntualidad por ruta/unidad, cobertura de turnos, protocolos de contingencia y control operativo. Persistir con este nivel de servicio impacta el estado de animo desde el abordaje, reduce el desempeno en turno, eleva costos (horas extra, reprocesos) y expone a la empresa a riesgos de seguridad y reputacionales. Se requiere un plan inmediato de estabilizacion con responsables, metricas y fechas de cierre."
   },
   medio: {
-    badge: 'Mejorable',
-    tono: 'text-amber-700',
-    bg: 'bg-amber-50',
-    heading: '⚠️ Hay cosas que mejorar.',
+    badge: "Mejorable",
+    tono: "text-amber-700",
+    bg: "bg-amber-50",
+    heading: "Hay cosas que mejorar.",
     detail:
-      'La evaluación (12–18/24) evidencia brechas en confiabilidad operativa y control del servicio: puntualidad por ruta/unidad variable, cobertura incompleta y protocolos de contingencia poco robustos. Mantener estas brechas incrementa tardanzas y ausentismo, afecta el estado de ánimo desde el abordaje, reduce desempeño y eleva costos (horas extra, reprocesos), además de riesgos de seguridad y reputacionales. Corregir de inmediato estabiliza el servicio y mejora la experiencia laboral desde el primer kilómetro.',
+      "La evaluacion (12–18/24) evidencia brechas en confiabilidad operativa y control del servicio: puntualidad por ruta/unidad variable, cobertura incompleta y protocolos de contingencia poco robustos. Mantener estas brechas incrementa tardanzas y ausentismo, afecta el estado de animo desde el abordaje, reduce desempeno y eleva costos (horas extra, reprocesos), ademas de riesgos de seguridad y reputacionales. Corregir de inmediato estabiliza el servicio y mejora la experiencia laboral desde el primer kilometro."
   },
   alto: {
-    badge: 'Sólido',
-    tono: 'text-emerald-700',
-    bg: 'bg-emerald-50',
-    heading: '🚍 Tienes un transporte de personal sólido.',
+    badge: "Sólido",
+    tono: "text-emerald-700",
+    bg: "bg-emerald-50",
+    heading: "Tienes un transporte de personal solido.",
     detail:
-      'La puntuación obtenida (19–24/24) evidencia un nivel alto de cumplimiento en puntualidad por ruta, cobertura de turnos, protocolos de contingencia, mantenimiento y seguridad de unidades, además de esquemas claros de escalación y atención ejecutiva. La operación cuenta con trazabilidad y reportes suficientes para asegurar continuidad y mejora continua.',
-  },
+      "La puntuacion obtenida (19–24/24) evidencia un nivel alto de cumplimiento en puntualidad por ruta, cobertura de turnos, protocolos de contingencia, mantenimiento y seguridad de unidades, ademas de esquemas claros de escalacion y atencion ejecutiva. La operacion cuenta con trazabilidad y reportes suficientes para asegurar continuidad y mejora continua."
+  }
 } as const;
 
-// ↓↓↓ esta es la única función que debes exponer/usar
 function rango(total: number): Rango {
   if (total <= 11) return textos.bajo;
   if (total <= 18) return textos.medio;
   return textos.alto;
 }
 
+function ResultadoPanel({ data }: { data: Rango }) {
+  return (
+    <section className={`mt-6 rounded-2xl p-5 ${data.bg} ${data.tono}`}>
+      <p className="text-sm font-semibold tracking-wide">
+        RESULTADO:{" "}
+        <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold">
+          {data.badge}
+        </span>
+      </p>
+      <p className="mt-3 font-bold">{data.heading}</p>
+      <p className="mt-2">{data.detail}</p>
+    </section>
+  );
+}
+
 export default function App() {
-  const [respuestas, setRespuestas] = useState<Record<number, number | null>>({})
+  const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
 
-  const total = useMemo(() => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0), [respuestas])
-  const faltantes = useMemo(() => preguntas.filter(p => respuestas[p.id] === undefined || respuestas[p.id] === null).length, [
-    respuestas,
-  ])
-  const r = rango(total)
+  const total = useMemo(
+    () =>
+      preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
+    [respuestas]
+  );
 
-  function setValor(id: number, val: number) {
-    setRespuestas(prev => ({ ...prev, [id]: val }))
-  }
+  const setValor = (id: number, val: number) => {
+    setRespuestas(prev => ({ ...prev, [id]: val }));
+  };
 
-  function reiniciar() {
-    setRespuestas({})
-  }
-
-  function imprimir() {
-    window.print()
-  }
-
-  function exportarCSV() {
-    const encabezados = ['Pregunta', 'Respuesta(2=Sí,1=Parcial,0=No)']
-    const filas = preguntas.map(p => [
-      p.texto.replace(/;/g, ','),
-      String(respuestas[p.id] ?? 0),
-    ])
-    filas.push(['TOTAL', String(total)])
-    const csv = [encabezados, ...filas].map(arr => arr.join(';')).join('\n')
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'cuestionario_transporte.csv'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+  const data = rango(total);
 
   return (
-    <div className='min-h-screen bg-neutral-50 text-neutral-800'>
-      <div className='max-w-4xl mx-auto p-6'>
-        <header className='mb-6'>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-3'>
-              {/* Logo Grupo Quokka */}
-              <img src='/quokka-logo.png' alt='Grupo Quokka' className='h-10 sm:h-12' />
-              <div>
-                <h1 className='text-2xl font-semibold tracking-tight'>
-                  ¿Que tan bueno es tu proveedor de transporte?
-                </h1>
-                <p className='text-sm text-neutral-500'>
-                  ¡Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test!
-                </p>
-              </div>
-            </div>
-            <div className='flex gap-2 print:hidden'>
-              <button onClick={reiniciar} className='px-3 py-2 rounded-xl bg-white shadow border hover:bg-neutral-50'>
-                Reiniciar
-              </button>
-              <button onClick={exportarCSV} className='px-3 py-2 rounded-xl bg-white shadow border hover:bg-neutral-50'>
-                Exportar CSV
-              </button>
-              <button onClick={imprimir} className='px-3 py-2 rounded-xl bg-black text-white shadow'>
-                Imprimir / PDF
-              </button>
+    <main className="mx-auto max-w-3xl p-6">
+      <h1 className="text-2xl font-bold">Cuestionario de transporte</h1>
+
+      <div className="mt-6 space-y-4">
+        {preguntas.map(p => (
+          <div key={p.id} className="border-b pb-4">
+            <p className="font-medium">{p.id}. {p.texto}</p>
+            <div className="mt-2 flex gap-6">
+              {[{ label: "Si", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map(opt => (
+                <label key={opt.val} className="inline-flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name={`p-${p.id}`}
+                    value={opt.val}
+                    checked={respuestas[p.id] === opt.val}
+                    onChange={() => setValor(p.id, opt.val)}
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
             </div>
           </div>
-        </header>
-
-        <div className='grid gap-4'>
-          {preguntas.map((p, idx) => (
-            <div key={p.id} className='bg-white rounded-2xl shadow p-4 border'>
-              <div className='flex items-start justify-between gap-4'>
-                <div className='font-medium'>
-                  {idx + 1}. {p.texto}
-                </div>
-                <div className='shrink-0 text-sm text-neutral-500'>Valor: {respuestas[p.id] ?? 0}</div>
-              </div>
-              <div className='mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2'>
-                <label className='flex items-center gap-2 cursor-pointer'>
-                  <input
-                    type='radio'
-                    name={`q-${p.id}`}
-                    className='h-4 w-4'
-                    checked={respuestas[p.id] === 2}
-                    onChange={() => setValor(p.id, 2)}
-                  />
-                  <span>Sí (2)</span>
-                </label>
-                <label className='flex items-center gap-2 cursor-pointer'>
-                  <input
-                    type='radio'
-                    name={`q-${p.id}`}
-                    className='h-4 w-4'
-                    checked={respuestas[p.id] === 1}
-                    onChange={() => setValor(p.id, 1)}
-                  />
-                  <span>Parcial (1)</span>
-                </label>
-                <label className='flex items-center gap-2 cursor-pointer'>
-                  <input
-                    type='radio'
-                    name={`q-${p.id}`}
-                    className='h-4 w-4'
-                    checked={respuestas[p.id] === 0}
-                    onChange={() => setValor(p.id, 0)}
-                  />
-                  <span>No (0)</span>
-                </label>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <section className='mt-6 grid gap-3'>
-          <div className='bg-white rounded-2xl shadow p-4 border flex items-center justify-between'>
-            <div className='text-lg font-semibold'>TOTAL</div>
-            <div className='text-2xl font-bold tabular-nums'>{total}</div>
-          </div>
-
-          <div className={`rounded-2xl p-4 border ${r.bg}`}>
-            <div className='flex items-center justify-between'>
-              <div className={`text-base font-medium ${r.tono}`}>{r.etiqueta}</div>
-              <span className='text-xs px-2 py-1 rounded-full bg-white border shadow-sm'>{r.badge}</span>
-            </div>
-            {faltantes > 0 && (
-              <p className='mt-2 text-xs text-neutral-500'>
-                Faltan {faltantes} pregunta(s) por responder. Las no respondidas cuentan como 0.
-              </p>
-            )}
-          </div>
-        </section>
-
-        <footer className='mt-8 text-center text-xs text-neutral-400 print:hidden'>
-          Desarrollado por Raúl Venegas para Grupo Quokka, los expertos en servicios para la Industria.
-        </footer>
+        ))}
       </div>
 
-      <style>{`@media print { .print\\:hidden { display: none !important; } body { background: white; } }`}</style>
-    </div>
-  )
+      <div className="mt-6 text-lg font-bold">TOTAL: {total}</div>
+
+      <ResultadoPanel data={data} />
+    </main>
+  );
 }
+
