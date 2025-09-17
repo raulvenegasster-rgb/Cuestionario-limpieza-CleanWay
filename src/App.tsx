@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import logo from "./assets/CLEANWAY_logo.png";
-import fondo from "./assets/fondo_clean.png";
+import logo from "./public/CLEANWAY_logo.png";
+import fondo from "./public/fondo_clean.png";
 
 /* ---------- Tipos ---------- */
 type Pregunta = { id: number; texto: string };
