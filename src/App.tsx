@@ -330,4 +330,45 @@ export default function App() {
 
           <h1 className="mt-4 text-2xl font-bold">¿Qué tan bueno es tu proveedor de transporte?</h1>
           <p className="text-sm text-neutral-600">
-            ¡Encuentra las debilidades y fortalezas
+            ¡Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test!
+          </p>
+        </header>
+
+        <div className="mb-3 text-sm text-neutral-600">
+          Total: <span className="font-semibold">{total}</span> / 24 · Faltantes:{" "}
+          <span className="font-semibold">{faltantes}</span>
+        </div>
+
+        {/* Preguntas */}
+        <div className="space-y-4">
+          {preguntas.map((p) => (
+            <div key={p.id} className="rounded-xl border bg-white/90 p-4 shadow">
+              <p className="font-medium">
+                {p.id}. {p.texto}
+              </p>
+              <div className="mt-2 flex gap-6">
+                {[{ label: "Sí", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map((opt) => (
+                  <label key={opt.val} className="inline-flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name={`q_${p.id}`}
+                      value={opt.val}
+                      checked={respuestas[p.id] === opt.val}
+                      onChange={() => setValor(p.id, opt.val)}
+                      className="h-4 w-4"
+                    />
+                    <span>{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* Modal automático al completar */}
+      <ModalContacto abierto={abrirModal} onClose={() => setAbrirModal(false)} total={total} />
+    </>
+  );
+}
+
