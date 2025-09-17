@@ -1,22 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 /* ---------- Tipos ---------- */
 type Pregunta = { id: number; texto: string };
 
 type Rango = {
   badge: "Muy pobre" | "Regular" | "Sólido";
-  tono: string;   // clases de color de texto
-  bg: string;     // clases de fondo del panel
+  tono: string;
+  bg: string;
   heading: string;
   detail: string;
-};
-
-type Contacto = {
-  nombre: string;
-  puesto: string;
-  empresa: string;
-  email: string;
-  celular: string;
 };
 
 /* ---------- Preguntas ---------- */
@@ -35,7 +27,7 @@ const preguntas: Pregunta[] = [
   { id: 12, texto: "¿Puedes saber quién subió y quién no al inicio del turno?" },
 ];
 
-/* ---------- Textos y estilos por rango ---------- */
+/* ---------- Textos por rango ---------- */
 const textos: Record<"bajo" | "medio" | "alto", Rango> = {
   bajo: {
     badge: "Muy pobre",
@@ -69,125 +61,169 @@ const textos: Record<"bajo" | "medio" | "alto", Rango> = {
   },
 } as const;
 
-/* ---------- Reglas de rango ---------- */
 function rango(total: number): Rango {
   if (total <= 11) return textos.bajo;
   if (total <= 18) return textos.medio;
   return textos.alto;
 }
 
-/* ---------- App ---------- */
-export default function App() {
-  const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
-  const [showResultado, setShowResultado] = useState(false);
-  const [showContacto, setShowContacto] = useState(false);
-  const [contacto, setContacto] = useState<Contacto>({
-    nombre: "",
-    puesto: "",
-    empresa: "",
-    email: "",
-    celular: "",
-  });
+/* ---------- Panel del resultado (lo usamos dentro del modal) ---------- */
+function ResultadoPanel({ data, total }: { data: Rango; total: number }) {
+  return (
+    <section className={`rounded-2xl p-5 ${data.bg}`}>
+      <p className="text-sm font-semibold tracking-wide">
+        RESULTADO: <span className="ml-2 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold">{data.badge}</span>
+        <span className="ml-2 text-neutral-500">| Total: {total} / 24</span>
+      </p>
+      <p className={`mt-3 font-bold ${data.tono}`}>{data.heading}</p>
+      <p className="mt-2">{data.detail}</p>
+    </section>
+  );
+}
+
+/* ---------- Modal de contacto + resultado ---------- */
+function ModalContacto({
+  abierto,
+  onClose,
+  total,
+}: {
+  abierto: boolean;
+  onClose: () => void;
+  total: number;
+}) {
+  const datos = rango(total);
+  const [nombre, setNombre] = useState("");
+  const [puesto, setPuesto] = useState("");
+  const [empresa, setEmpresa] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [celular, setCelular] = useState("");
   const [enviando, setEnviando] = useState(false);
-  const [enviado, setEnviado] = useState(false);
 
-  const total = useMemo(
-    () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
-    [respuestas]
-  );
+  if (!abierto) return null;
 
-  const faltantes = useMemo(
-    () => preguntas.filter((p) => respuestas[p.id] === undefined || respuestas[p.id] === null).length,
-    [respuestas]
-  );
-
-  const data = rango(total);
-  const completo = faltantes === 0 && Object.keys(respuestas).length === preguntas.length;
-
-  const setValor = (id: number, val: number) => {
-    setRespuestas((prev) => ({ ...prev, [id]: val }));
-  };
-
-  const reiniciar = () => {
-    setRespuestas({});
-    setContacto({ nombre: "", puesto: "", empresa: "", email: "", celular: "" });
-    setShowResultado(false);
-    setShowContacto(false);
-    setEnviado(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const imprimir = () => window.print();
-
-  const exportarCSV = () => {
-    const encabezados = ["Pregunta", "Respuesta (2=Sí,1=Parcial,0=No)"];
-    const filas = preguntas.map((p) => [
-      p.texto.replace(/;/g, ","),
-      String(respuestas[p.id] ?? 0),
-    ]);
-    filas.push(["TOTAL", String(total)]);
-    const csv = [encabezados, ...filas].map((arr) => arr.join(";")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "cuestionario_transporte.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // Al completar, abre el modal de contacto (si aún no se envió)
-  useEffect(() => {
-    if (completo && !enviado) setShowContacto(true);
-  }, [completo, enviado]);
-
-  const abrirResultado = () => {
-    if (!completo) return;
-    if (enviado) setShowResultado(true);
-    else setShowContacto(true);
-  };
-
-  const enviarContacto = async () => {
-    if (!contacto.nombre.trim() || !contacto.email.trim()) {
+  async function enviar() {
+    if (!nombre.trim() || !correo.trim()) {
       alert("Nombre y correo son obligatorios.");
       return;
     }
     setEnviando(true);
     try {
-      const res = await fetch("/api/send", {
+      const resp = await fetch("/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contact: contacto,
+          nombre: nombre.trim(),
+          puesto: puesto.trim(),
+          empresa: empresa.trim(),
+          correo: correo.trim(),
+          celular: celular.trim(),
           total,
-          rango: data,
-          respuestas,
-          preguntas,
         }),
       });
-      if (!res.ok) throw new Error(await res.text());
-      setEnviado(true);
-      setShowContacto(false);
-      setShowResultado(true);
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        alert("No se pudo enviar. Intenta de nuevo.\n" + (data?.error || ""));
+        setEnviando(false);
+        return;
+      }
+      alert("¡Enviado! Gracias.");
+      onClose();
     } catch (e) {
       alert("No se pudo enviar. Intenta de nuevo.");
-    } finally {
       setEnviando(false);
     }
+  }
+
+  return (
+    <>
+      {/* fondo oscuro */}
+      <div className="fixed inset-0 z-40 bg-black/50" />
+      {/* modal */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl rounded-2xl bg-white p-5 shadow-xl">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Resultado del diagnóstico</h3>
+            <button className="rounded p-2 hover:bg-neutral-100" onClick={onClose}>✕</button>
+          </div>
+
+          <ResultadoPanel data={datos} total={total} />
+
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="text-sm">Nombre*</label>
+              <input value={nombre} onChange={(e)=>setNombre(e.target.value)} className="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label className="text-sm">Puesto</label>
+              <input value={puesto} onChange={(e)=>setPuesto(e.target.value)} className="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label className="text-sm">Empresa</label>
+              <input value={empresa} onChange={(e)=>setEmpresa(e.target.value)} className="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label className="text-sm">Correo*</label>
+              <input value={correo} onChange={(e)=>setCorreo(e.target.value)} type="email" className="mt-1 w-full rounded-lg border p-2" />
+            </div>
+            <div>
+              <label className="text-sm">Celular</label>
+              <input value={celular} onChange={(e)=>setCelular(e.target.value)} className="mt-1 w-full rounded-lg border p-2" />
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-end gap-2">
+            <button className="rounded-xl bg-neutral-100 px-3 py-2" onClick={onClose}>Cerrar</button>
+            <button
+              className="rounded-xl bg-black px-3 py-2 text-white disabled:opacity-60"
+              onClick={enviar}
+              disabled={enviando}
+            >
+              {enviando ? "Enviando..." : "Enviar y cerrar"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ---------- App ---------- */
+export default function App() {
+  const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
+  const [abrirModal, setAbrirModal] = useState(false);
+
+  const total = useMemo(
+    () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
+    [respuestas]
+  );
+  const faltantes = useMemo(
+    () => preguntas.filter((p) => respuestas[p.id] === undefined || respuestas[p.id] === null).length,
+    [respuestas]
+  );
+
+  const setValor = (id: number, val: number) => {
+    setRespuestas((prev) => ({ ...prev, [id]: val }));
+  };
+
+  const reiniciar = () => setRespuestas({});
+  const imprimir = () => window.print();
+
+  const verResultado = () => {
+    if (faltantes > 0) {
+      alert(`Te faltan ${faltantes} preguntas por contestar.`);
+      return;
+    }
+    setAbrirModal(true);
   };
 
   return (
     <>
-      {/* Fondo e imagen (usa /public/Fondo.png) */}
-      <div
-        className="fixed inset-0 -z-10 bg-[url('/Fondo.png')] bg-cover bg-center bg-no-repeat"
-        aria-hidden="true"
-      />
-      {/* Velo para legibilidad */}
+      {/* Fondo con imagen */}
+      <div className="fixed inset-0 -z-10 bg-[url('/Fondo.png')] bg-cover bg-center bg-no-repeat" aria-hidden="true" />
+      {/* Velo (transparente) */}
       <div className="fixed inset-0 -z-10 bg-white/40" aria-hidden="true" />
 
       <main className="mx-auto max-w-3xl p-6">
-        {/* Header con logo y acciones */}
         <header className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -198,19 +234,13 @@ export default function App() {
               <button onClick={reiniciar} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
                 Reiniciar
               </button>
-              <button onClick={exportarCSV} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
-                Exportar CSV
-              </button>
               <button onClick={imprimir} className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90">
                 Imprimir / PDF
               </button>
               <button
-                onClick={abrirResultado}
-                disabled={!completo}
-                title={!completo ? "Responde todas las preguntas para ver el resultado" : ""}
-                className={`rounded-xl px-3 py-2 shadow ${
-                  completo ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-neutral-200 text-neutral-500"
-                }`}
+                onClick={verResultado}
+                className="rounded-xl bg-emerald-600 px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-60"
+                disabled={faltantes > 0}
               >
                 Ver resultado
               </button>
@@ -223,13 +253,12 @@ export default function App() {
           </p>
         </header>
 
-        {/* Estado superior */}
         <div className="mb-3 text-sm text-neutral-600">
-          Total: <span className="font-semibold">{total}</span> / 24 ·{" "}
-          Faltantes: <span className="font-semibold">{faltantes}</span>
+          Total: <span className="font-semibold">{total}</span> / 24 · Faltantes:{" "}
+          <span className="font-semibold">{faltantes}</span>
         </div>
 
-        {/* Lista de preguntas */}
+        {/* Preguntas */}
         <div className="space-y-4">
           {preguntas.map((p) => (
             <div key={p.id} className="rounded-xl border bg-white/90 p-4 shadow">
@@ -237,11 +266,7 @@ export default function App() {
                 {p.id}. {p.texto}
               </p>
               <div className="mt-2 flex gap-6">
-                {[
-                  { label: "Sí", val: 2 },
-                  { label: "Parcial", val: 1 },
-                  { label: "No", val: 0 },
-                ].map((opt) => (
+                {[{ label: "Sí", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map((opt) => (
                   <label key={opt.val} className="inline-flex items-center gap-2">
                     <input
                       type="radio"
@@ -260,124 +285,8 @@ export default function App() {
         </div>
       </main>
 
-      {/* Modal de CONTACTO */}
-      {showContacto && (
-        <>
-          <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
-          <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true">
-            <div className="w-full max-w-xl rounded-2xl bg-white shadow-xl">
-              <div className="flex items-center justify-between border-b p-4">
-                <h2 className="text-lg font-semibold">Déjanos tus datos de contacto</h2>
-                <button
-                  aria-label="Cerrar"
-                  className="rounded p-1 text-neutral-500 hover:bg-neutral-100"
-                  onClick={() => setShowContacto(false)}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="p-4 space-y-3">
-                {[
-                  { key: "nombre", label: "Nombre*", type: "text", required: true },
-                  { key: "puesto", label: "Puesto", type: "text" },
-                  { key: "empresa", label: "Empresa", type: "text" },
-                  { key: "email", label: "Correo*", type: "email", required: true },
-                  { key: "celular", label: "Celular", type: "tel" },
-                ].map((f) => (
-                  <div key={f.key}>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">{f.label}</label>
-                    <input
-                      type={f.type as any}
-                      required={Boolean(f.required)}
-                      value={(contacto as any)[f.key] ?? ""}
-                      onChange={(e) => setContacto((prev) => ({ ...prev, [f.key]: e.target.value }))}
-                      className="w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-end gap-2 border-t p-4">
-                <button
-                  onClick={() => setShowContacto(false)}
-                  className="rounded-xl bg-neutral-200 px-3 py-2 shadow hover:bg-neutral-300"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={enviarContacto}
-                  disabled={enviando}
-                  className="rounded-xl bg-emerald-600 px-3 py-2 text-white shadow hover:bg-emerald-700 disabled:opacity-60"
-                >
-                  {enviando ? "Enviando…" : "Enviar y ver resultado"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Modal de RESULTADO */}
-      {showResultado && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowResultado(false)}
-            aria-hidden="true"
-          />
-          <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true">
-            <div className="w-full max-w-2xl rounded-2xl bg-white shadow-xl">
-              <div className="flex items-center justify-between border-b p-4">
-                <h2 className="text-lg font-semibold">Resultado del diagnóstico</h2>
-                <button
-                  aria-label="Cerrar"
-                  className="rounded p-1 text-neutral-500 hover:bg-neutral-100"
-                  onClick={() => setShowResultado(false)}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="p-4">
-                <div className={`rounded-2xl p-4 ${data.bg}`}>
-                  <p className="text-sm font-semibold">RESULTADO:</p>
-                  <div className="mt-1 flex items-center gap-3 text-xs font-semibold">
-                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 ${data.tono}`}>
-                      {data.badge}
-                    </span>
-                    <span className="text-neutral-600">| Total: {total} / 24</span>
-                  </div>
-
-                  <p className={`mt-3 font-bold ${data.tono}`}>{data.heading}</p>
-                  <p className="mt-2">{data.detail}</p>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 border-t p-4">
-                <button
-                  onClick={reiniciar}
-                  className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
-                >
-                  Reiniciar cuestionario
-                </button>
-                <button
-                  onClick={imprimir}
-                  className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90"
-                >
-                  Imprimir / PDF
-                </button>
-                <button
-                  onClick={() => setShowResultado(false)}
-                  className="rounded-xl bg-neutral-200 px-3 py-2 shadow hover:bg-neutral-300"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      {/* Modal (resultado + formulario) */}
+      <ModalContacto abierto={abrirModal} onClose={() => setAbrirModal(false)} total={total} />
     </>
   );
 }
