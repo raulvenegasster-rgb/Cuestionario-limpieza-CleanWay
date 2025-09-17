@@ -187,7 +187,7 @@ export default function App() {
         <header className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/CLEANWAY_logo.png" alt="Clean Way" className="h-10 sm:h-12" />
+              <img src="/CLEANWAY_logo.png" alt="Clean Way" className="h-24 sm:h-28" />
             </div>
 
             <div className="flex gap-2 print:hidden">
