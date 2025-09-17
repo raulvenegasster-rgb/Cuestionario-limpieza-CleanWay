@@ -18,7 +18,7 @@ const preguntas: Pregunta[] = [
 ];
 
 type Rango = {
-  badge: "Muy pobre" | "Mejorable" | "Sólido";
+  badge: "Muy pobre" | "Regular" | "Sólido";
   tono: string;   // clase tailwind de texto
   bg: string;     // clase tailwind de fondo
   heading: string;
@@ -40,7 +40,7 @@ const textos = {
     bg: "bg-amber-50",
     heading: "⚠️ Hay cosas que mejorar.",
     detail:
-      "La evaluación (12–18/24) evidencia brechas en confiabilidad operativa y control del servicio: puntualidad por ruta/unidad variable, cobertura incompleta y protocolos de contingencia poco robustos. Mantener estas brechas incrementa tardanzas y ausentismo, afecta el estado de ánimo desde el abordaje, reduce desempeño y eleva costos (horas extra, reprocesos), además de riesgos de seguridad y reputacionales. Corregir de inmediato estabiliza el servicio y mejora la experiencia laboral desde el primer abordaje.",
+      "La evaluación evidencia brechas en confiabilidad operativa y control del servicio: puntualidad por ruta/unidad variable, cobertura incompleta y protocolos de contingencia poco robustos. Mantener estas brechas incrementa tardanzas y ausentismo, afecta el estado de ánimo desde el abordaje, reduce desempeño y eleva costos (horas extra, reprocesos), además de riesgos de seguridad y reputacionales. Corregir de inmediato estabiliza el servicio y mejora la experiencia laboral desde el primer abordaje.",
   },
   alto: {
     badge: "Sólido",
@@ -48,7 +48,7 @@ const textos = {
     bg: "bg-emerald-50",
     heading: "🚍 Tienes un transporte de personal sólido.",
     detail:
-      "La puntuación obtenida (19–24/24) evidencia un nivel alto de cumplimiento en puntualidad por ruta, cobertura de turnos, protocolos de contingencia, mantenimiento y seguridad de unidades, además de esquemas claros de escalación y atención ejecutiva. La operación cuenta con trazabilidad y reportes suficientes para asegurar continuidad y mejora continua.",
+      "La puntuación obtenida evidencia un nivel alto de cumplimiento en puntualidad por ruta, cobertura de turnos, protocolos de contingencia, mantenimiento y seguridad de unidades, además de esquemas claros de escalación y atención ejecutiva. La operación cuenta con trazabilidad y reportes suficientes para asegurar continuidad y mejora continua.",
   },
 } as const;
 
