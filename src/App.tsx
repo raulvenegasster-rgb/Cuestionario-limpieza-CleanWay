@@ -167,7 +167,7 @@ export default function App() {
     <>
       {/* Fondo */}
       <div
-        className="fixed inset-0 -z-10 bg-[url('/fondo_clean.png')] bg-cover bg-center bg-no-repeat"
+        className="fixed inset-0 -z-10 bg-[url('/fondo_clean')] bg-cover bg-center bg-no-repeat"
         aria-hidden="true"
       />
       {/* Velo para que se lea mejor el contenido */}
@@ -178,7 +178,7 @@ export default function App() {
         <header className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/CLEANWAY_logo.png" alt="Clean Way" className="h-10 sm:h-12" />
+              <img src="/CLEANWAY_logo" alt="Clean Way" className="h-10 sm:h-12" />
             </div>
 
             <div className="flex gap-2 print:hidden">
