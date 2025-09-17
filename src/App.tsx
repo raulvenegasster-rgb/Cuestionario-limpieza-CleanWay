@@ -35,7 +35,7 @@ const textos = {
       "La puntuación obtenida indica incumplimientos recurrentes en puntualidad por ruta/unidad, cobertura de turnos, protocolos de contingencia y control operativo. Persistir con este nivel de servicio impacta el estado de ánimo desde el abordaje, reduce el desempeño en turno, eleva costos (horas extra, reprocesos) y expone a la empresa a riesgos de seguridad y reputacionales. Se requiere un plan inmediato de estabilización con responsables, métricas y fechas de cierre.",
   },
   medio: {
-    badge: "Mejorable",
+    badge: "Regular",
     tono: "text-amber-700",
     bg: "bg-amber-50",
     heading: "⚠️ Hay cosas que mejorar.",
