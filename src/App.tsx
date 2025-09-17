@@ -1,14 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import logo from "./public/CLEANWAY_logo.png";
-import fondo from "./public/fondo_clean.png";
 
 /* ---------- Tipos ---------- */
 type Pregunta = { id: number; texto: string };
 
 type Rango = {
   badge: "Muy pobre" | "Regular" | "Sólido";
-  tono: string;
-  bg: string;
+  tono: string;   // clases de color de texto
+  bg: string;     // clases de fondo del panel
   heading: string;
   detail: string;
 };
@@ -20,44 +18,46 @@ const preguntas: Pregunta[] = [
   { id: 3, texto: "¿Existen rutas y checklists documentados por tipo de área (oficina, industria, retail, salud, educación)?" },
   { id: 4, texto: "¿Se ejecutan auditorías internas con evidencia (bitácoras/fotos) y acciones correctivas?" },
   { id: 5, texto: "¿Tienes abastecimiento continuo de insumos con opciones biodegradables?" },
-  { id: 6, texto: "¿El personal operativo está capacitado y certificado en técnicas y químicos de limpieza?" },
-  { id: 7, texto: "¿Cuentan con control de asistencia (biométrico o geolocalizado) para evitar fraudes?" },
-  { id: 8, texto: "¿Tienes escalamiento 24/7 (operador, coordinador, dirección) para incidentes y quejas?" },
-  { id: 9, texto: "¿Se atienden incidencias en menos de 2 horas con plan de contención?" },
-  { id: 10, texto: "¿Se cumple con normativas de seguridad y salud (EPP, MSDS, inducciones)?" },
-  { id: 11, texto: "¿Recibes reportes de desempeño y hallazgos con indicadores claros (KPI)?" },
-  { id: 12, texto: "¿Hay trazabilidad de reemplazos y rotación para cubrir ausencias sin afectar el servicio?" },
+  { id: 6, texto: "¿Cuentas con planes de contingencia para ausencias e incidencias críticas?" },
+  { id: 7, texto: "¿Monitoreas indicadores por zona/turno (cumplimiento, retrabajos, quejas)?" },
+  { id: 8, texto: "¿La supervisión realiza rondines digitales con evidencia fotográfica?" },
+  { id: 9, texto: "¿El personal tiene capacitación vigente (químicos, EPP, seguridad e higiene)?" },
+  { id: 10, texto: "¿Existen protocolos para áreas sensibles (salud, laboratorios, alimentos) y control de accesos?" },
+  { id: 11, texto: "¿Tienes trazabilidad de incidencias y tiempos de respuesta (SLA/SLT)?" },
+  { id: 12, texto: "¿Cuentas con escalamiento 24/7 y atención ejecutiva para resolver desviaciones?" },
 ];
 
-/* ---------- Textos por rango ---------- */
+/* ---------- Textos y estilos por rango ---------- */
 const textos: Record<"bajo" | "medio" | "alto", Rango> = {
   bajo: {
     badge: "Muy pobre",
     tono: "text-red-700",
     bg: "bg-red-50",
-    heading: "❌ Tu esquema de limpieza requiere intervención inmediata.",
+    heading: "❌ Necesitas estabilizar tu servicio de limpieza.",
     detail:
-      "Se observan brechas en certificación, asistencia garantizada, control operativo y escalamiento. " +
-      "Esto incrementa riesgos de incumplimiento, auditorías con hallazgos, incidentes y costos ocultos. " +
-      "Implementa un plan de estabilización con responsables, métricas y fechas de cierre; prioriza checklists, control de asistencia y abastecimiento.",
+      "La evaluación evidencia incumplimientos en certificación, cobertura de asistencia, control operativo y protocolos para áreas críticas. " +
+      "Continuar así incrementa hallazgos en auditorías, retrabajos, quejas internas y riesgos de higiene/seguridad. " +
+      "Se requiere un plan inmediato de estabilización con responsables, métricas y fechas de cierre.",
   },
   medio: {
     badge: "Regular",
     tono: "text-amber-700",
     bg: "bg-amber-50",
-    heading: "⚠️ Hay oportunidades importantes de mejora.",
+    heading: "⚠️ Hay brechas que atender.",
     detail:
-      "Tu operación muestra cubiertas varias prácticas, pero existen huecos en auditorías, escalamiento 24/7, trazabilidad y controles de desempeño. " +
-      "Cerrarlos elevará la calidad, reducirá reclamos y te blindará ante inspecciones. Define planes de acción y supervisión efectiva.",
+      "Existen avances, pero se observan brechas en estandarización por tipo de área, evidencia de cumplimiento, indicadores, " +
+      "y respuesta a incidencias. Corregirlas reduce retrabajos y quejas, y evita hallazgos en auditorías. " +
+      "Implementa rutas, checklists, rondines con evidencia y escalamiento claro.",
   },
   alto: {
     badge: "Sólido",
     tono: "text-emerald-700",
     bg: "bg-emerald-50",
-    heading: "✅ Tienes un esquema de limpieza sólido.",
+    heading: "🚿 Tienes un servicio de limpieza sólido.",
     detail:
-      "Cuentas con certificación, asistencia garantizada, auditorías, control de asistencia, escalamiento 24/7, " +
-      "KPI y trazabilidad de reemplazos. Mantén la mejora continua con revisiones periódicas y retroalimentación del cliente interno.",
+      "¡Muy bien! Tienes certificación y/o programa formal, cobertura de asistencia garantizada, rutas y checklists por tipo de área, " +
+      "auditorías internas con evidencia, abastecimiento con opciones biodegradables, indicadores por zona y escalamiento 24/7. " +
+      "Esto asegura continuidad operativa, higiene y cumplimiento ante auditorías.",
   },
 } as const;
 
@@ -68,163 +68,222 @@ function rango(total: number): Rango {
   return textos.alto;
 }
 
-/* ---------- Modal ---------- */
-function Modal({
-  open,
-  onClose,
-  children,
-}: {
-  open: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
-        <button
-          className="absolute right-3 top-3 rounded px-2 py-1 text-sm text-neutral-600 hover:bg-neutral-100"
-          onClick={onClose}
-        >
-          ✕
-        </button>
-        {children}
-      </div>
-    </div>
-  );
-}
-
 /* ---------- Panel de resultado ---------- */
 function ResultadoPanel({ data, total }: { data: Rango; total: number }) {
   return (
     <section className={`rounded-2xl p-5 ${data.bg}`}>
-      <p className="text-sm font-semibold tracking-wide">
-        RESULTADO:{" "}
+      <div className="flex items-center gap-2 text-xs text-neutral-600">
+        <p className="font-semibold text-neutral-800">RESULTADO:</p>
         <span
-          className={`ml-2 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${data.tono}`}
+          className={`inline-flex items-center rounded-full border px-2 py-0.5 font-semibold ${data.tono}`}
         >
           {data.badge}
-        </span>{" "}
-        <span className="text-neutral-500">| Total: {total} / 24</span>
-      </p>
+        </span>
+        <span className="ml-auto">| Total: {total} / 24</span>
+      </div>
+
       <p className={`mt-3 font-bold ${data.tono}`}>{data.heading}</p>
       <p className="mt-2">{data.detail}</p>
     </section>
   );
 }
 
+/* ---------- Modal simple ---------- */
+function Modal({
+  open,
+  onClose,
+  children,
+  title,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4">
+      <div className="mx-auto mt-20 w-full max-w-2xl rounded-2xl bg-white p-5 shadow-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <button
+            onClick={onClose}
+            className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 /* ---------- App ---------- */
 export default function App() {
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
-  const [modalAbierto, setModalAbierto] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
 
   const total = useMemo(
     () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
     [respuestas]
   );
+
   const faltantes = useMemo(
-    () => preguntas.filter((p) => respuestas[p.id] == null).length,
+    () => preguntas.filter((p) => respuestas[p.id] === undefined || respuestas[p.id] === null).length,
     [respuestas]
   );
+
   const data = rango(total);
 
-  const setValor = (id: number, val: number) => setRespuestas((prev) => ({ ...prev, [id]: val }));
-  const reiniciar = () => { setRespuestas({}); setModalAbierto(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const setValor = (id: number, val: number) => {
+    setRespuestas((prev) => ({ ...prev, [id]: val }));
+  };
+
+  const reiniciar = () => {
+    setRespuestas({});
+    setOpenModal(false);
+  };
+
   const imprimir = () => window.print();
 
   const exportarCSV = () => {
     const encabezados = ["Pregunta", "Respuesta (2=Sí,1=Parcial,0=No)"];
-    const filas = preguntas.map((p) => [p.texto.replace(/;/g, ","), String(respuestas[p.id] ?? 0)]);
+    const filas = preguntas.map((p) => [
+      p.texto.replace(/;/g, ","),
+      String(respuestas[p.id] ?? 0),
+    ]);
     filas.push(["TOTAL", String(total)]);
     const csv = [encabezados, ...filas].map((arr) => arr.join(";")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "cuestionario_cleanway.csv";
+    a.download = "cuestionario_limpieza_cleanway.csv";
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  useEffect(() => { if (faltantes === 0) setModalAbierto(true); }, [faltantes]);
+  // Abre el modal automáticamente cuando se completen todas las preguntas
+  useEffect(() => {
+    if (faltantes === 0 && preguntas.length > 0) {
+      setOpenModal(true);
+    }
+  }, [faltantes]);
 
   return (
     <>
-      {/* Fondo usando import */}
+      {/* Fondo desde /public */}
       <div
-        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${fondo})` }}
+        className="fixed inset-0 -z-10 bg-[url('/fondo_clean.png')] bg-cover bg-center bg-no-repeat"
         aria-hidden="true"
       />
-      <div className="fixed inset-0 -z-10 bg-white/55" aria-hidden="true" />
+      {/* Velo opcional para mejorar legibilidad (ajusta el /40 a tu gusto) */}
+      <div className="fixed inset-0 -z-10 bg-white/50" aria-hidden="true" />
 
       <main className="mx-auto max-w-3xl p-6">
+        {/* Header con logo y acciones */}
         <header className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="Clean Way" className="h-10 sm:h-12" />
+              <img src="/CLEANWAY_logo.png" alt="Clean Way" className="h-10 sm:h-12" />
             </div>
 
             <div className="flex gap-2 print:hidden">
-              <button onClick={reiniciar} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
+              <button
+                onClick={reiniciar}
+                className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
+              >
                 Reiniciar
               </button>
-              <button onClick={exportarCSV} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
+              <button
+                onClick={exportarCSV}
+                className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
+              >
                 Exportar CSV
               </button>
-              <button onClick={imprimir} className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90">
+              <button
+                onClick={imprimir}
+                className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90"
+              >
                 Imprimir / PDF
               </button>
             </div>
           </div>
 
-          <h1 className="mt-4 text-2xl font-bold">¿Qué tan robusto es tu servicio de limpieza?</h1>
+          <h1 className="mt-4 text-2xl font-bold">
+            ¿Qué tan robusto es tu servicio de limpieza?
+          </h1>
           <p className="text-sm text-neutral-600">
             Responde este diagnóstico y detecta brechas en certificación, control operativo y continuidad del servicio.
           </p>
-
-          <div className="mt-3 text-sm text-neutral-600">
-            Total: <span className="font-semibold">{total}</span> / 24 · Faltantes:{" "}
-            <span className="font-semibold">{faltantes}</span>
-          </div>
         </header>
 
+        {/* Estado superior */}
+        <div className="mb-3 text-sm text-neutral-600">
+          Total: <span className="font-semibold">{total}</span> / 24 ·{" "}
+          Faltantes: <span className="font-semibold">{faltantes}</span>
+        </div>
+
+        {/* Lista de preguntas */}
         <div className="space-y-4">
           {preguntas.map((p) => (
             <div key={p.id} className="rounded-xl border bg-white/90 p-4 shadow">
-              <p className="font-medium">{p.id}. {p.texto}</p>
+              <p className="font-medium">
+                {p.id}. {p.texto}
+              </p>
               <div className="mt-2 flex gap-6">
-                {[{ label: "Sí", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map((opt) => (
-                  <label key={opt.val} className="inline-flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name={`q_${p.id}`}
-                      value={opt.val}
-                      checked={respuestas[p.id] === opt.val}
-                      onChange={() => setValor(p.id, opt.val)}
-                      className="h-4 w-4"
-                    />
-                    <span>{opt.label}</span>
-                  </label>
-                ))}
+                {[{ label: "Sí", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map(
+                  (opt) => (
+                    <label key={opt.val} className="inline-flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name={`q_${p.id}`}
+                        value={opt.val}
+                        checked={respuestas[p.id] === opt.val}
+                        onChange={() => setValor(p.id, opt.val)}
+                        className="h-4 w-4"
+                      />
+                      <span>{opt.label}</span>
+                    </label>
+                  )
+                )}
               </div>
             </div>
           ))}
         </div>
-
-        <Modal open={modalAbierto} onClose={() => setModalAbierto(false)}>
-          <ResultadoPanel data={data} total={total} />
-          <div className="mt-4 flex justify-end gap-2 print:hidden">
-            <button onClick={() => setModalAbierto(false)} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
-              Cerrar
-            </button>
-            <button onClick={imprimir} className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90">
-              Imprimir / PDF
-            </button>
-          </div>
-        </Modal>
       </main>
+
+      {/* Modal de resultado */}
+      <Modal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        title="Resultado del diagnóstico"
+      >
+        <ResultadoPanel data={data} total={total} />
+        <div className="mt-5 flex justify-end gap-2 print:hidden">
+          <button
+            onClick={() => setOpenModal(false)}
+            className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
+          >
+            Cerrar
+          </button>
+          <button
+            onClick={imprimir}
+            className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90"
+          >
+            Imprimir / PDF
+          </button>
+          <button
+            onClick={reiniciar}
+            className="rounded-xl bg-neutral-900 px-3 py-2 text-white shadow hover:bg-neutral-800"
+          >
+            Reiniciar cuestionario
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }
+
