@@ -11,6 +11,14 @@ type Rango = {
   detail: string;
 };
 
+type Contacto = {
+  nombre: string;
+  puesto: string;
+  empresa: string;
+  email: string;
+  celular: string;
+};
+
 /* ---------- Preguntas ---------- */
 const preguntas: Pregunta[] = [
   { id: 1, texto: "¿Recibes reportes de puntualidad por ruta y unidad con indicadores claros?" },
@@ -71,7 +79,17 @@ function rango(total: number): Rango {
 /* ---------- App ---------- */
 export default function App() {
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
-  const [showModal, setShowModal] = useState(false);
+  const [showResultado, setShowResultado] = useState(false);
+  const [showContacto, setShowContacto] = useState(false);
+  const [contacto, setContacto] = useState<Contacto>({
+    nombre: "",
+    puesto: "",
+    empresa: "",
+    email: "",
+    celular: "",
+  });
+  const [enviando, setEnviando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
 
   const total = useMemo(
     () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
@@ -92,7 +110,10 @@ export default function App() {
 
   const reiniciar = () => {
     setRespuestas({});
-    setShowModal(false);
+    setContacto({ nombre: "", puesto: "", empresa: "", email: "", celular: "" });
+    setShowResultado(false);
+    setShowContacto(false);
+    setEnviado(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -115,10 +136,45 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // Abre el modal automáticamente al completar todas las preguntas
+  // Al completar, abre el modal de contacto (si aún no se envió)
   useEffect(() => {
-    if (completo) setShowModal(true);
-  }, [completo]);
+    if (completo && !enviado) setShowContacto(true);
+  }, [completo, enviado]);
+
+  const abrirResultado = () => {
+    if (!completo) return;
+    if (enviado) setShowResultado(true);
+    else setShowContacto(true);
+  };
+
+  const enviarContacto = async () => {
+    if (!contacto.nombre.trim() || !contacto.email.trim()) {
+      alert("Nombre y correo son obligatorios.");
+      return;
+    }
+    setEnviando(true);
+    try {
+      const res = await fetch("/api/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contact: contacto,
+          total,
+          rango: data,
+          respuestas,
+          preguntas,
+        }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setEnviado(true);
+      setShowContacto(false);
+      setShowResultado(true);
+    } catch (e) {
+      alert("No se pudo enviar. Intenta de nuevo.");
+    } finally {
+      setEnviando(false);
+    }
+  };
 
   return (
     <>
@@ -149,7 +205,7 @@ export default function App() {
                 Imprimir / PDF
               </button>
               <button
-                onClick={() => setShowModal(true)}
+                onClick={abrirResultado}
                 disabled={!completo}
                 title={!completo ? "Responde todas las preguntas para ver el resultado" : ""}
                 className={`rounded-xl px-3 py-2 shadow ${
@@ -202,33 +258,82 @@ export default function App() {
             </div>
           ))}
         </div>
-
-        {/* (SIN resultado inline) */}
       </main>
 
-      {/* Modal de resultado */}
-      {showModal && (
+      {/* Modal de CONTACTO */}
+      {showContacto && (
         <>
-          <div
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowModal(false)}
-            aria-hidden="true"
-          />
-          <div
-            className="fixed inset-0 z-50 grid place-items-center p-4"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
-          >
-            <div className="w-full max-w-2xl rounded-2xl bg-white shadow-xl">
+          <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
+          <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true">
+            <div className="w-full max-w-xl rounded-2xl bg-white shadow-xl">
               <div className="flex items-center justify-between border-b p-4">
-                <h2 id="modal-title" className="text-lg font-semibold">
-                  Resultado del diagnóstico
-                </h2>
+                <h2 className="text-lg font-semibold">Déjanos tus datos de contacto</h2>
                 <button
                   aria-label="Cerrar"
                   className="rounded p-1 text-neutral-500 hover:bg-neutral-100"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => setShowContacto(false)}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-4 space-y-3">
+                {[
+                  { key: "nombre", label: "Nombre*", type: "text", required: true },
+                  { key: "puesto", label: "Puesto", type: "text" },
+                  { key: "empresa", label: "Empresa", type: "text" },
+                  { key: "email", label: "Correo*", type: "email", required: true },
+                  { key: "celular", label: "Celular", type: "tel" },
+                ].map((f) => (
+                  <div key={f.key}>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">{f.label}</label>
+                    <input
+                      type={f.type as any}
+                      required={Boolean(f.required)}
+                      value={(contacto as any)[f.key] ?? ""}
+                      onChange={(e) => setContacto((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                      className="w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-2 border-t p-4">
+                <button
+                  onClick={() => setShowContacto(false)}
+                  className="rounded-xl bg-neutral-200 px-3 py-2 shadow hover:bg-neutral-300"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={enviarContacto}
+                  disabled={enviando}
+                  className="rounded-xl bg-emerald-600 px-3 py-2 text-white shadow hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {enviando ? "Enviando…" : "Enviar y ver resultado"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Modal de RESULTADO */}
+      {showResultado && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowResultado(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true">
+            <div className="w-full max-w-2xl rounded-2xl bg-white shadow-xl">
+              <div className="flex items-center justify-between border-b p-4">
+                <h2 className="text-lg font-semibold">Resultado del diagnóstico</h2>
+                <button
+                  aria-label="Cerrar"
+                  className="rounded p-1 text-neutral-500 hover:bg-neutral-100"
+                  onClick={() => setShowResultado(false)}
                 >
                   ✕
                 </button>
@@ -263,7 +368,7 @@ export default function App() {
                   Imprimir / PDF
                 </button>
                 <button
-                  onClick={() => setShowModal(false)}
+                  onClick={() => setShowResultado(false)}
                   className="rounded-xl bg-neutral-200 px-3 py-2 shadow hover:bg-neutral-300"
                 >
                   Cerrar
