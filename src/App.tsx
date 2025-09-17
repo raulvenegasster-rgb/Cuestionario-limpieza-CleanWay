@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
 
 /* ---------- Tipos ---------- */
 type Pregunta = { id: number; texto: string };
@@ -69,26 +69,69 @@ function rango(total: number): Rango {
 }
 
 /* ---------- Panel de resultado ---------- */
-function ResultadoPanel({ data }: { data: Rango }) {
+function ResultadoPanel({ data, total }: { data: Rango; total: number }) {
   return (
-    <section className={`mt-6 rounded-2xl p-5 ${data.bg}`}>
+    <section className={`rounded-2xl p-5 ${data.bg}`}>
       <p className="text-sm font-semibold tracking-wide">RESULTADO:</p>
-      <p className="mt-1">
+
+      <p className="mt-1 flex items-center gap-2">
         <span
           className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${data.tono}`}
         >
           {data.badge}
         </span>
+        <span className="text-xs text-neutral-500">| Total: {total} / 24</span>
       </p>
+
       <p className={`mt-3 font-bold ${data.tono}`}>{data.heading}</p>
       <p className="mt-2">{data.detail}</p>
     </section>
   );
 }
 
+/* ---------- Modal simple ---------- */
+function Modal({
+  open,
+  onClose,
+  title,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  children: ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title || "Resultado"}
+    >
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative mx-4 w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b p-4">
+          <h2 className="text-lg font-semibold">{title || "Resultado"}</h2>
+          <button
+            onClick={onClose}
+            className="rounded-full px-3 py-1 text-sm text-neutral-600 hover:bg-neutral-100"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="max-h-[80vh] overflow-auto p-6">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- App ---------- */
 export default function App() {
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
+  const [openModal, setOpenModal] = useState(false);
+  const [hasShown, setHasShown] = useState(false); // muestra automática solo una vez por “completado”
 
   const total = useMemo(
     () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
@@ -106,7 +149,11 @@ export default function App() {
     setRespuestas((prev) => ({ ...prev, [id]: val }));
   };
 
-  const reiniciar = () => setRespuestas({});
+  const reiniciar = () => {
+    setRespuestas({});
+    setHasShown(false); // si borran respuestas, volverá a autoabrir cuando completen de nuevo
+    setOpenModal(false);
+  };
 
   const imprimir = () => window.print();
 
@@ -127,6 +174,14 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  // Autoabre el modal la primera vez que todas las preguntas están contestadas
+  useEffect(() => {
+    if (faltantes === 0 && !hasShown) {
+      setOpenModal(true);
+      setHasShown(true);
+    }
+  }, [faltantes, hasShown]);
+
   return (
     <>
       {/* Fondo e imagen (usa /public/Fondo.png) */}
@@ -134,7 +189,7 @@ export default function App() {
         className="fixed inset-0 -z-10 bg-[url('/Fondo.png')] bg-cover bg-center bg-no-repeat"
         aria-hidden="true"
       />
-      {/* Velo más transparente para que se vea MÁS el fondo */}
+      {/* Velo: sube/baja opacidad para jugar con la visibilidad del fondo */}
       <div
         className="fixed inset-0 -z-10 bg-white/40 backdrop-blur-[0px]"
         aria-hidden="true"
@@ -158,6 +213,18 @@ export default function App() {
               <button onClick={imprimir} className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90">
                 Imprimir / PDF
               </button>
+              <button
+                onClick={() => setOpenModal(true)}
+                disabled={faltantes !== 0}
+                className={`rounded-xl px-3 py-2 shadow ${
+                  faltantes === 0
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                    : "bg-neutral-200 text-neutral-500 cursor-not-allowed"
+                }`}
+                title={faltantes === 0 ? "Ver resultado" : "Contesta todas las preguntas para ver el resultado"}
+              >
+                Ver resultado
+              </button>
             </div>
           </div>
 
@@ -171,14 +238,14 @@ export default function App() {
 
         {/* Estado superior */}
         <div className="mb-3 text-sm text-neutral-600">
-          Total: <span className="font-semibold">{total}</span> / 24 ·
-          {" "}Faltantes: <span className="font-semibold">{faltantes}</span>
+          Total: <span className="font-semibold">{total}</span> / 24 ·{" "}
+          Faltantes: <span className="font-semibold">{faltantes}</span>
         </div>
 
         {/* Lista de preguntas */}
         <div className="space-y-4">
           {preguntas.map((p) => (
-            <div key={p.id} className="rounded-xl border bg-white/90 p-4 shadow">
+            <div key={p.id} className="rounded-xl border bg-white/90 p-4 shadow print:bg-white print:shadow-none print:border">
               <p className="font-medium">
                 {p.id}. {p.texto}
               </p>
@@ -205,10 +272,30 @@ export default function App() {
           ))}
         </div>
 
-        {/* Resultado */}
-        <ResultadoPanel data={data} />
+        {/* Panel al final (opcional, útil fuera del modal también) */}
+        <div className="mt-6">
+          <ResultadoPanel data={data} total={total} />
+        </div>
       </main>
+
+      {/* Modal de resultado */}
+      <Modal open={openModal} onClose={() => setOpenModal(false)} title="Resultado del diagnóstico">
+        <ResultadoPanel data={data} total={total} />
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            onClick={() => setOpenModal(false)}
+            className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
+          >
+            Cerrar
+          </button>
+          <button
+            onClick={imprimir}
+            className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90"
+          >
+            Imprimir / PDF
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }
-
