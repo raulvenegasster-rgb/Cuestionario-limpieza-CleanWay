@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import logo from "./assets/CLEANWAY_logo.png";
+import fondo from "./assets/fondo_clean.png";
 
 /* ---------- Tipos ---------- */
 type Pregunta = { id: number; texto: string };
 
 type Rango = {
   badge: "Muy pobre" | "Regular" | "Sólido";
-  tono: string;   // clases de color de texto
-  bg: string;     // clases de fondo del panel
+  tono: string;
+  bg: string;
   heading: string;
   detail: string;
 };
@@ -27,7 +29,7 @@ const preguntas: Pregunta[] = [
   { id: 12, texto: "¿Hay trazabilidad de reemplazos y rotación para cubrir ausencias sin afectar el servicio?" },
 ];
 
-/* ---------- Textos y estilos por rango ---------- */
+/* ---------- Textos por rango ---------- */
 const textos: Record<"bajo" | "medio" | "alto", Rango> = {
   bajo: {
     badge: "Muy pobre",
@@ -61,12 +63,12 @@ const textos: Record<"bajo" | "medio" | "alto", Rango> = {
 
 /* ---------- Reglas de rango ---------- */
 function rango(total: number): Rango {
-  if (total <= 11) return textos.bajo;   // 0-11
-  if (total <= 18) return textos.medio;  // 12-18
-  return textos.alto;                    // 19-24
+  if (total <= 11) return textos.bajo;
+  if (total <= 18) return textos.medio;
+  return textos.alto;
 }
 
-/* ---------- Modal simple ---------- */
+/* ---------- Modal ---------- */
 function Modal({
   open,
   onClose,
@@ -121,32 +123,19 @@ export default function App() {
     () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
     [respuestas]
   );
-
   const faltantes = useMemo(
-    () => preguntas.filter((p) => respuestas[p.id] === undefined || respuestas[p.id] === null).length,
+    () => preguntas.filter((p) => respuestas[p.id] == null).length,
     [respuestas]
   );
-
   const data = rango(total);
 
-  const setValor = (id: number, val: number) => {
-    setRespuestas((prev) => ({ ...prev, [id]: val }));
-  };
-
-  const reiniciar = () => {
-    setRespuestas({});
-    setModalAbierto(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
+  const setValor = (id: number, val: number) => setRespuestas((prev) => ({ ...prev, [id]: val }));
+  const reiniciar = () => { setRespuestas({}); setModalAbierto(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const imprimir = () => window.print();
 
   const exportarCSV = () => {
     const encabezados = ["Pregunta", "Respuesta (2=Sí,1=Parcial,0=No)"];
-    const filas = preguntas.map((p) => [
-      p.texto.replace(/;/g, ","),
-      String(respuestas[p.id] ?? 0),
-    ]);
+    const filas = preguntas.map((p) => [p.texto.replace(/;/g, ","), String(respuestas[p.id] ?? 0)]);
     filas.push(["TOTAL", String(total)]);
     const csv = [encabezados, ...filas].map((arr) => arr.join(";")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -158,27 +147,23 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // Abre el modal automáticamente cuando se contestan todas
-  useEffect(() => {
-    if (faltantes === 0) setModalAbierto(true);
-  }, [faltantes]);
+  useEffect(() => { if (faltantes === 0) setModalAbierto(true); }, [faltantes]);
 
   return (
     <>
-      {/* Fondo */}
+      {/* Fondo usando import */}
       <div
-        className="fixed inset-0 -z-10 bg-[url('/fondo_clean')] bg-cover bg-center bg-no-repeat"
+        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${fondo})` }}
         aria-hidden="true"
       />
-      {/* Velo para que se lea mejor el contenido */}
       <div className="fixed inset-0 -z-10 bg-white/55" aria-hidden="true" />
 
       <main className="mx-auto max-w-3xl p-6">
-        {/* Header */}
         <header className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/CLEANWAY_logo" alt="Clean Way" className="h-10 sm:h-12" />
+              <img src={logo} alt="Clean Way" className="h-10 sm:h-12" />
             </div>
 
             <div className="flex gap-2 print:hidden">
@@ -194,32 +179,23 @@ export default function App() {
             </div>
           </div>
 
-          <h1 className="mt-4 text-2xl font-bold">
-            ¿Qué tan robusto es tu servicio de limpieza?
-          </h1>
+          <h1 className="mt-4 text-2xl font-bold">¿Qué tan robusto es tu servicio de limpieza?</h1>
           <p className="text-sm text-neutral-600">
             Responde este diagnóstico y detecta brechas en certificación, control operativo y continuidad del servicio.
           </p>
 
           <div className="mt-3 text-sm text-neutral-600">
-            Total: <span className="font-semibold">{total}</span> / 24 ·{" "}
-            Faltantes: <span className="font-semibold">{faltantes}</span>
+            Total: <span className="font-semibold">{total}</span> / 24 · Faltantes:{" "}
+            <span className="font-semibold">{faltantes}</span>
           </div>
         </header>
 
-        {/* Preguntas */}
         <div className="space-y-4">
           {preguntas.map((p) => (
             <div key={p.id} className="rounded-xl border bg-white/90 p-4 shadow">
-              <p className="font-medium">
-                {p.id}. {p.texto}
-              </p>
+              <p className="font-medium">{p.id}. {p.texto}</p>
               <div className="mt-2 flex gap-6">
-                {[
-                  { label: "Sí", val: 2 },
-                  { label: "Parcial", val: 1 },
-                  { label: "No", val: 0 },
-                ].map((opt) => (
+                {[{ label: "Sí", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map((opt) => (
                   <label key={opt.val} className="inline-flex items-center gap-2">
                     <input
                       type="radio"
@@ -237,20 +213,13 @@ export default function App() {
           ))}
         </div>
 
-        {/* Modal de resultado (solo se ve cuando faltantes = 0) */}
         <Modal open={modalAbierto} onClose={() => setModalAbierto(false)}>
           <ResultadoPanel data={data} total={total} />
           <div className="mt-4 flex justify-end gap-2 print:hidden">
-            <button
-              onClick={() => setModalAbierto(false)}
-              className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
-            >
+            <button onClick={() => setModalAbierto(false)} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
               Cerrar
             </button>
-            <button
-              onClick={imprimir}
-              className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90"
-            >
+            <button onClick={imprimir} className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90">
               Imprimir / PDF
             </button>
           </div>
