@@ -1,54 +1,72 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Resend } from 'resend';
+// api/send.ts
+import { Resend } from "resend";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'GET') return res.status(200).json({ ok: true });
-  if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
+export default async function handler(req: Request): Promise<Response> {
+  if (req.method !== "POST") {
+    return new Response("Method Not Allowed", { status: 405 });
+  }
 
   try {
-    const { nombre, puesto, empresa, correo, celular, total } = req.body ?? {};
+    const body = (await req.json()) as {
+      nombre: string;
+      puesto: string;
+      empresa: string;
+      correo: string;
+      celular: string;
+      total: number;
+      respuestas: Record<number, number | null>;
+    };
 
-    if (!nombre || !correo) {
-      return res.status(400).json({ ok: false, error: 'Faltan campos requeridos (nombre/correo)' });
-    }
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const to = process.env.EMAIL_TO!;
+    const from = process.env.EMAIL_FROM || "onboarding@resend.dev";
 
-    const apiKey = process.env.RESEND_API_KEY;
-    const to = process.env.EMAIL_TO;
+    const filas = Object.entries(body.respuestas)
+      .sort((a, b) => Number(a[0]) - Number(b[0]))
+      .map(([id, val]) => `<tr><td>${id}</td><td style="text-align:center">${val ?? 0}</td></tr>`)
+      .join("");
 
-    if (!apiKey) return res.status(500).json({ ok: false, error: 'Falta RESEND_API_KEY' });
-    if (!to) return res.status(500).json({ ok: false, error: 'Falta EMAIL_TO' });
-
-    const resend = new Resend(apiKey);
-
-    const subject = `Nuevo lead (Total: ${total ?? '-'})`;
     const html = `
-      <h2>Nuevo contacto</h2>
+      <h2>Nuevo contacto - Clean Way</h2>
+      <p><b>Total:</b> ${body.total} / 24</p>
       <ul>
-        <li><b>Nombre:</b> ${nombre}</li>
-        <li><b>Puesto:</b> ${puesto ?? ''}</li>
-        <li><b>Empresa:</b> ${empresa ?? ''}</li>
-        <li><b>Correo:</b> ${correo}</li>
-        <li><b>Celular:</b> ${celular ?? ''}</li>
-        <li><b>Total:</b> ${total ?? ''}</li>
+        <li><b>Nombre:</b> ${body.nombre || "-"}</li>
+        <li><b>Puesto:</b> ${body.puesto || "-"}</li>
+        <li><b>Empresa:</b> ${body.empresa || "-"}</li>
+        <li><b>Correo:</b> ${body.correo || "-"}</li>
+        <li><b>Celular:</b> ${body.celular || "-"}</li>
       </ul>
+      <h3>Respuestas</h3>
+      <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">
+        <thead><tr><th>Pregunta</th><th>Valor (2/1/0)</th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
     `;
 
     const { error } = await resend.emails.send({
-      from: 'onboarding@resend.dev',  // remitente válido por defecto
+      from,
       to,
-      subject,
+      subject: `Nuevo lead Clean Way (Total: ${body.total})`,
       html,
-      reply_to: correo,
+      reply_to: body.correo || undefined,
     });
 
     if (error) {
-      // devolvemos detalle para que el frontend muestre algo útil
-      return res.status(500).json({ ok: false, error });
+      return new Response(JSON.stringify({ error: (error as any).message || "Resend error" }), {
+        status: 400,
+        headers: { "content-type": "application/json" },
+      });
     }
 
-    return res.status(200).json({ ok: true });
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
   } catch (err: any) {
-    return res.status(500).json({ ok: false, error: err?.message || 'Error interno' });
+    return new Response(JSON.stringify({ error: err?.message || "Unknown error" }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
   }
 }
 
