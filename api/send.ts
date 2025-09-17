@@ -14,7 +14,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const apiKey = process.env.RESEND_API_KEY;
     const to = process.env.EMAIL_TO;
-    const from = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
     if (!apiKey) return res.status(500).json({ ok: false, error: 'Falta RESEND_API_KEY' });
     if (!to) return res.status(500).json({ ok: false, error: 'Falta EMAIL_TO' });
@@ -35,14 +34,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     `;
 
     const { error } = await resend.emails.send({
-      from,
+      from: 'onboarding@resend.dev',  // remitente válido por defecto
       to,
       subject,
       html,
       reply_to: correo,
     });
 
-    if (error) return res.status(500).json({ ok: false, error: String(error) });
+    if (error) {
+      // devolvemos detalle para que el frontend muestre algo útil
+      return res.status(500).json({ ok: false, error });
+    }
 
     return res.status(200).json({ ok: true });
   } catch (err: any) {
