@@ -112,4 +112,167 @@ export default function App() {
     a.href = url;
     a.download = "cuestionario_transporte.csv";
     a.click();
-    URL.r
+    URL.revokeObjectURL(url);
+  };
+
+  // Abre el modal automáticamente al completar todas las preguntas
+  useEffect(() => {
+    if (completo) setShowModal(true);
+  }, [completo]);
+
+  return (
+    <>
+      {/* Fondo e imagen (usa /public/Fondo.png) */}
+      <div
+        className="fixed inset-0 -z-10 bg-[url('/Fondo.png')] bg-cover bg-center bg-no-repeat"
+        aria-hidden="true"
+      />
+      {/* Velo para legibilidad */}
+      <div className="fixed inset-0 -z-10 bg-white/40" aria-hidden="true" />
+
+      <main className="mx-auto max-w-3xl p-6">
+        {/* Header con logo y acciones */}
+        <header className="mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src="/quokka-logo.png" alt="Grupo Quokka" className="h-10 sm:h-12" />
+            </div>
+
+            <div className="flex gap-2 print:hidden">
+              <button onClick={reiniciar} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
+                Reiniciar
+              </button>
+              <button onClick={exportarCSV} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
+                Exportar CSV
+              </button>
+              <button onClick={imprimir} className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90">
+                Imprimir / PDF
+              </button>
+              <button
+                onClick={() => setShowModal(true)}
+                disabled={!completo}
+                title={!completo ? "Responde todas las preguntas para ver el resultado" : ""}
+                className={`rounded-xl px-3 py-2 shadow ${
+                  completo ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-neutral-200 text-neutral-500"
+                }`}
+              >
+                Ver resultado
+              </button>
+            </div>
+          </div>
+
+          <h1 className="mt-4 text-2xl font-bold">¿Qué tan bueno es tu proveedor de transporte?</h1>
+          <p className="text-sm text-neutral-600">
+            ¡Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test!
+          </p>
+        </header>
+
+        {/* Estado superior */}
+        <div className="mb-3 text-sm text-neutral-600">
+          Total: <span className="font-semibold">{total}</span> / 24 ·{" "}
+          Faltantes: <span className="font-semibold">{faltantes}</span>
+        </div>
+
+        {/* Lista de preguntas */}
+        <div className="space-y-4">
+          {preguntas.map((p) => (
+            <div key={p.id} className="rounded-xl border bg-white/90 p-4 shadow">
+              <p className="font-medium">
+                {p.id}. {p.texto}
+              </p>
+              <div className="mt-2 flex gap-6">
+                {[
+                  { label: "Sí", val: 2 },
+                  { label: "Parcial", val: 1 },
+                  { label: "No", val: 0 },
+                ].map((opt) => (
+                  <label key={opt.val} className="inline-flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name={`q_${p.id}`}
+                      value={opt.val}
+                      checked={respuestas[p.id] === opt.val}
+                      onChange={() => setValor(p.id, opt.val)}
+                      className="h-4 w-4"
+                    />
+                    <span>{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* (SIN resultado inline) */}
+      </main>
+
+      {/* Modal de resultado */}
+      {showModal && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowModal(false)}
+            aria-hidden="true"
+          />
+          <div
+            className="fixed inset-0 z-50 grid place-items-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
+            <div className="w-full max-w-2xl rounded-2xl bg-white shadow-xl">
+              <div className="flex items-center justify-between border-b p-4">
+                <h2 id="modal-title" className="text-lg font-semibold">
+                  Resultado del diagnóstico
+                </h2>
+                <button
+                  aria-label="Cerrar"
+                  className="rounded p-1 text-neutral-500 hover:bg-neutral-100"
+                  onClick={() => setShowModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-4">
+                <div className={`rounded-2xl p-4 ${data.bg}`}>
+                  <p className="text-sm font-semibold">RESULTADO:</p>
+                  <div className="mt-1 flex items-center gap-3 text-xs font-semibold">
+                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 ${data.tono}`}>
+                      {data.badge}
+                    </span>
+                    <span className="text-neutral-600">| Total: {total} / 24</span>
+                  </div>
+
+                  <p className={`mt-3 font-bold ${data.tono}`}>{data.heading}</p>
+                  <p className="mt-2">{data.detail}</p>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 border-t p-4">
+                <button
+                  onClick={reiniciar}
+                  className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
+                >
+                  Reiniciar cuestionario
+                </button>
+                <button
+                  onClick={imprimir}
+                  className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90"
+                >
+                  Imprimir / PDF
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="rounded-xl bg-neutral-200 px-3 py-2 shadow hover:bg-neutral-300"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
