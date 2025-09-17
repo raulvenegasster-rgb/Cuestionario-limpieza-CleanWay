@@ -58,103 +58,64 @@ function rango(total: number): Rango {
 }
 
 function ResultadoPanel({ data }: { data: Rango }) {
-  return (
-    <section className={`mt-6 rounded-2xl p-5 ${data.bg} ${data.tono}`}>
-      <p className="text-sm font-semibold tracking-wide">
-        RESULTADO:{" "}
-        <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold">
-          {data.badge}
-        </span>
-      </p>
-      <p className="mt-3 font-bold">{data.heading}</p>
-      <p className="mt-2">{data.detail}</p>
-    </section>
-  );
-}
+ return (
+  <main className="min-h-screen relative text-neutral-900">
+    {/* Fondo: imagen + velo para contraste */}
+    <div
+      className="pointer-events-none absolute inset-0 -z-10 bg-[url('/bg-bus.jpg')] bg-cover bg-center bg-fixed"
+      aria-hidden="true"
+    />
+    <div
+      className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-white/90 via-white/75 to-white/90"
+      aria-hidden="true"
+    />
 
-export default function App() {
-  const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
-
-  const total = useMemo(
-    () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
-    [respuestas]
-  );
-
-  const setValor = (id: number, val: number) => {
-    setRespuestas(prev => ({ ...prev, [id]: val }));
-  };
-
-  const data = rango(total);
-
-  return (
-    <main className="min-h-screen bg-neutral-50 text-neutral-900">
-      <div className="relative">
-        {/* Fondo con la foto y un velo para contraste */}
-        <div
-          className="absolute inset-0 bg-[url('/bg-bus.jpg')] bg-cover bg-center opacity-15"
-          aria-hidden="true"
-        />
-        <div
-          className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/85 to-white/95"
-          aria-hidden="true"
-        />
-
-        <div className="relative mx-auto max-w-5xl p-6">
-          {/* Header con logo + títulos */}
-          <header className="mb-6 flex items-start justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <img
-                src="/quokka-logo.png"
-                alt="Grupo Quokka"
-                className="h-10 sm:h-12"
-              />
-              <div>
-                <h1 className="text-3xl font-bold leading-tight">
-                  ¿Qué tan bueno es tu proveedor de transporte?
-                </h1>
-                <p className="text-neutral-500">
-                  ¡Encuentra las debilidades y fortalezas de tu servicio de transporte
-                  con este sencillo test!
-                </p>
-              </div>
-            </div>
-          </header>
-
-          {/* Preguntas en tarjetas semitransparentes */}
-          <div className="space-y-4">
-            {preguntas.map(p => (
-              <div
-                key={p.id}
-                className="rounded-2xl border border-neutral-200/70 bg-white/70 backdrop-blur-md p-4 shadow-sm"
-              >
-                <p className="font-medium">
-                  {p.id}. {p.texto}
-                </p>
-                <div className="mt-2 flex gap-6 text-neutral-800">
-                  {[{ label: 'Sí', val: 2 }, { label: 'Parcial', val: 1 }, { label: 'No', val: 0 }].map(
-                    opt => (
-                      <label key={opt.val} className="inline-flex items-center gap-2">
-                        <input
-                          type="radio"
-                          name={`p-${p.id}`}
-                          value={opt.val}
-                          checked={respuestas[p.id] === opt.val}
-                          onChange={() => setValor(p.id, opt.val)}
-                        />
-                        <span>{opt.label}</span>
-                      </label>
-                    )
-                  )}
-                </div>
-              </div>
-            ))}
+    <div className="relative mx-auto max-w-5xl p-6">
+      {/* Header con logo + títulos */}
+      <header className="mb-6 flex items-start justify-between gap-6">
+        <div className="flex items-center gap-3">
+          <img src="/quokka-logo.png" alt="Grupo Quokka" className="h-10 sm:h-12" />
+          <div>
+            <h1 className="text-3xl font-bold leading-tight">
+              ¿Qué tan bueno es tu proveedor de transporte?
+            </h1>
+            <p className="text-neutral-500">
+              ¡Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test!
+            </p>
           </div>
-
-          {/* Total + panel de resultado */}
-          <div className="mt-6 text-lg font-bold">TOTAL: {total}</div>
-          <ResultadoPanel data={data} />
         </div>
+      </header>
+
+      {/* Preguntas en tarjetas semitransparentes */}
+      <div className="space-y-4">
+        {preguntas.map(p => (
+          <div
+            key={p.id}
+            className="rounded-2xl border border-neutral-200/70 bg-white/70 backdrop-blur-md p-4 shadow-sm"
+          >
+            <p className="font-medium">
+              {p.id}. {p.texto}
+            </p>
+            <div className="mt-2 flex gap-6 text-neutral-800">
+              {[{ label: 'Sí', val: 2 }, { label: 'Parcial', val: 1 }, { label: 'No', val: 0 }].map(opt => (
+                <label key={opt.val} className="inline-flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name={`p-${p.id}`}
+                    value={opt.val}
+                    checked={respuestas[p.id] === opt.val}
+                    onChange={() => setValor(p.id, opt.val)}
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
-    </main>
-  );
-}
+
+      <div className="mt-6 text-lg font-bold">TOTAL: {total}</div>
+      <ResultadoPanel data={data} />
+    </div>
+  </main>
+);
