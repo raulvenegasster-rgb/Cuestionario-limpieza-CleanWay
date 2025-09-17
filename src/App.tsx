@@ -5,78 +5,106 @@ type Pregunta = { id: number; texto: string };
 
 type Rango = {
   badge: "Muy pobre" | "Regular" | "Sólido";
-  tono: string;
-  bg: string;
+  tono: string;   // clases de color de texto
+  bg: string;     // clases de fondo del panel
   heading: string;
   detail: string;
 };
 
-/* ---------- Preguntas ---------- */
+/* ---------- Preguntas (Clean Way) ---------- */
 const preguntas: Pregunta[] = [
-  { id: 1, texto: "¿Recibes reportes de puntualidad por ruta y unidad con indicadores claros?" },
-  { id: 2, texto: "¿Tu proveedor garantiza al menos un 95% de cumplimiento en horarios?" },
-  { id: 3, texto: "¿Tus empleados viajan en unidades recientes, con clima y mantenimiento preventivo al día?" },
-  { id: 4, texto: "¿Los choferes cuentan con capacitación en manejo defensivo y protocolos de seguridad?" },
-  { id: 5, texto: "¿Las unidades ofrecen comodidad suficiente para llegadas con buen ánimo y energía?" },
-  { id: 6, texto: "¿El proveedor entiende que el transporte influye en la rotación y el compromiso del personal?" },
-  { id: 7, texto: "Si falla una unidad, ¿recibes reposición inmediata?" },
-  { id: 8, texto: "¿Existen protocolos probados para incidentes en ruta o bloqueos?" },
-  { id: 9, texto: "¿Puedes contactar a más de una persona responsable en caso de incidencia?" },
-  { id: 10, texto: "¿Hay tres niveles de escalación (operador, coordinador, dirección) para resolver rápido?" },
-  { id: 11, texto: "¿Cuentas con acceso a monitoreo en tiempo real de tus unidades?" },
-  { id: 12, texto: "¿Puedes saber quién subió y quién no al inicio del turno?" },
+  { id: 1, texto: "¿Cuentas con un programa de limpieza certificado (p. ej. ISO 9001)?" },
+  { id: 2, texto: "¿Tu proveedor garantiza la asistencia para que la operación nunca se detenga?" },
+  { id: 3, texto: "¿Existen rutas y checklists documentados por tipo de área (oficina, industria, retail, salud, educación)?" },
+  { id: 4, texto: "¿Se ejecutan auditorías internas con evidencia (bitácoras/fotos) y acciones correctivas?" },
+  { id: 5, texto: "¿Tienes abastecimiento continuo de insumos con opciones biodegradables?" },
+  { id: 6, texto: "¿El personal operativo está capacitado y certificado en técnicas y químicos de limpieza?" },
+  { id: 7, texto: "¿Cuentan con control de asistencia (biométrico o geolocalizado) para evitar fraudes?" },
+  { id: 8, texto: "¿Tienes escalamiento 24/7 (operador, coordinador, dirección) para incidentes y quejas?" },
+  { id: 9, texto: "¿Se atienden incidencias en menos de 2 horas con plan de contención?" },
+  { id: 10, texto: "¿Se cumple con normativas de seguridad y salud (EPP, MSDS, inducciones)?" },
+  { id: 11, texto: "¿Recibes reportes de desempeño y hallazgos con indicadores claros (KPI)?" },
+  { id: 12, texto: "¿Hay trazabilidad de reemplazos y rotación para cubrir ausencias sin afectar el servicio?" },
 ];
 
-/* ---------- Textos por rango ---------- */
+/* ---------- Textos y estilos por rango ---------- */
 const textos: Record<"bajo" | "medio" | "alto", Rango> = {
   bajo: {
     badge: "Muy pobre",
     tono: "text-red-700",
     bg: "bg-red-50",
-    heading: "❌ Necesitas revisar tu servicio de transporte.",
+    heading: "❌ Tu esquema de limpieza requiere intervención inmediata.",
     detail:
-      "Definitivamente hay incumplimientos recurrentes en puntualidad por ruta/unidad, cobertura de turnos, protocolos de contingencia y control operativo. " +
-      "Persistir con este nivel de servicio impacta el estado de ánimo desde el abordaje, reduce el desempeño en turno, eleva costos (horas extra, reprocesos) " +
-      "y expone a la empresa a riesgos de seguridad y reputacionales. Se requiere un plan inmediato de estabilización con responsables, métricas y fechas de cierre.",
+      "Se observan brechas en certificación, asistencia garantizada, control operativo y escalamiento. " +
+      "Esto incrementa riesgos de incumplimiento, auditorías con hallazgos, incidentes y costos ocultos. " +
+      "Implementa un plan de estabilización con responsables, métricas y fechas de cierre; prioriza checklists, control de asistencia y abastecimiento.",
   },
   medio: {
     badge: "Regular",
     tono: "text-amber-700",
     bg: "bg-amber-50",
-    heading: "⚠️ Hay cosas que mejorar.",
+    heading: "⚠️ Hay oportunidades importantes de mejora.",
     detail:
-      "Hay evidentes brechas en confiabilidad operativa y control del servicio: puntualidad por ruta/unidad variable, cobertura incompleta y protocolos " +
-      "de contingencia poco robustos. Mantener estas brechas incrementa tardanzas y ausentismo, afecta el estado de ánimo desde el abordaje, reduce desempeño y eleva costos. " +
-      "Corregir de inmediato estabiliza el servicio y mejora la experiencia laboral desde el primer contacto del día.",
+      "Tu operación muestra cubiertas varias prácticas, pero existen huecos en auditorías, escalamiento 24/7, trazabilidad y controles de desempeño. " +
+      "Cerrarlos elevará la calidad, reducirá reclamos y te blindará ante inspecciones. Define planes de acción y supervisión efectiva.",
   },
   alto: {
     badge: "Sólido",
     tono: "text-emerald-700",
     bg: "bg-emerald-50",
-    heading: "🚍 Tienes un transporte de personal sólido.",
+    heading: "✅ Tienes un esquema de limpieza sólido.",
     detail:
-      "¡Felicidades! Tienes un nivel alto de cumplimiento en puntualidad por ruta, cobertura de turnos, protocolos de contingencia, " +
-      "mantenimiento y seguridad de unidades, además de esquemas claros de escalación y atención ejecutiva. La operación cuenta con trazabilidad y reportes " +
-      "suficientes para asegurar continuidad y mejora continua.",
+      "Cuentas con certificación, asistencia garantizada, auditorías, control de asistencia, escalamiento 24/7, " +
+      "KPI y trazabilidad de reemplazos. Mantén la mejora continua con revisiones periódicas y retroalimentación del cliente interno.",
   },
 } as const;
 
+/* ---------- Reglas de rango ---------- */
 function rango(total: number): Rango {
-  if (total <= 11) return textos.bajo;
-  if (total <= 18) return textos.medio;
-  return textos.alto;
+  if (total <= 11) return textos.bajo;   // 0-11
+  if (total <= 18) return textos.medio;  // 12-18
+  return textos.alto;                    // 19-24
 }
 
-/* ---------- Panel del resultado ---------- */
+/* ---------- Modal simple ---------- */
+function Modal({
+  open,
+  onClose,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
+        <button
+          className="absolute right-3 top-3 rounded px-2 py-1 text-sm text-neutral-600 hover:bg-neutral-100"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Panel de resultado ---------- */
 function ResultadoPanel({ data, total }: { data: Rango; total: number }) {
   return (
     <section className={`rounded-2xl p-5 ${data.bg}`}>
       <p className="text-sm font-semibold tracking-wide">
         RESULTADO:{" "}
-        <span className="ml-2 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold">
+        <span
+          className={`ml-2 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${data.tono}`}
+        >
           {data.badge}
-        </span>
-        <span className="ml-2 text-neutral-500">| Total: {total} / 24</span>
+        </span>{" "}
+        <span className="text-neutral-500">| Total: {total} / 24</span>
       </p>
       <p className={`mt-3 font-bold ${data.tono}`}>{data.heading}</p>
       <p className="mt-2">{data.detail}</p>
@@ -84,212 +112,22 @@ function ResultadoPanel({ data, total }: { data: Rango; total: number }) {
   );
 }
 
-/* ---------- Modal contacto + gate de resultado ---------- */
-function ModalContacto({
-  abierto,
-  onClose,
-  total,
-}: {
-  abierto: boolean;
-  onClose: () => void;
-  total: number;
-}) {
-  const datos = rango(total);
-
-  const [nombre, setNombre] = useState("");
-  const [puesto, setPuesto] = useState("");
-  const [empresa, setEmpresa] = useState("");
-  const [correo, setCorreo] = useState("");
-  const [celular, setCelular] = useState("");
-
-  const [enviando, setEnviando] = useState(false);
-  const [mostrando, setMostrando] = useState(false);
-  const [mensajeEnvio, setMensajeEnvio] = useState<null | { ok: boolean; text: string }>(null);
-
-  useEffect(() => {
-    if (!abierto) {
-      // reset al cerrar
-      setEnviando(false);
-      setMostrando(false);
-      setMensajeEnvio(null);
-      setNombre("");
-      setPuesto("");
-      setEmpresa("");
-      setCorreo("");
-      setCelular("");
-    }
-  }, [abierto]);
-
-  if (!abierto) return null;
-
-  async function verResultados() {
-    if (!nombre.trim() || !correo.trim()) {
-      alert("Nombre y correo son obligatorios.");
-      return;
-    }
-
-    // intentamos enviar, pero no bloqueamos la visualización del resultado
-    setEnviando(true);
-    try {
-      const resp = await fetch("/api/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: nombre.trim(),
-          puesto: puesto.trim(),
-          empresa: empresa.trim(),
-          correo: correo.trim(),
-          celular: celular.trim(),
-          total,
-        }),
-      });
-
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) {
-        setMensajeEnvio({
-          ok: false,
-          text:
-            typeof data?.error === "string"
-              ? data.error
-              : data?.error
-              ? JSON.stringify(data.error)
-              : "No se pudo enviar.",
-        });
-      } else {
-        setMensajeEnvio({ ok: true, text: "¡Datos enviados!" });
-      }
-    } catch (e: any) {
-      setMensajeEnvio({ ok: false, text: "No se pudo enviar." });
-    } finally {
-      setEnviando(false);
-      setMostrando(true); // mostramos el resultado pase lo que pase
-    }
-  }
-
-  return (
-    <>
-      <div className="fixed inset-0 z-40 bg-black/50" />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl rounded-2xl bg-white p-5 shadow-xl">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Resultado del diagnóstico</h3>
-            <button className="rounded p-2 hover:bg-neutral-100" onClick={onClose}>
-              ✕
-            </button>
-          </div>
-
-          {!mostrando && (
-            <>
-              <p className="text-sm text-neutral-600">
-                Completa tus datos para ver el resultado.
-              </p>
-
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label className="text-sm">Nombre*</label>
-                  <input
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
-                    className="mt-1 w-full rounded-lg border p-2"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm">Puesto</label>
-                  <input
-                    value={puesto}
-                    onChange={(e) => setPuesto(e.target.value)}
-                    className="mt-1 w-full rounded-lg border p-2"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm">Empresa</label>
-                  <input
-                    value={empresa}
-                    onChange={(e) => setEmpresa(e.target.value)}
-                    className="mt-1 w-full rounded-lg border p-2"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm">Correo*</label>
-                  <input
-                    value={correo}
-                    onChange={(e) => setCorreo(e.target.value)}
-                    type="email"
-                    className="mt-1 w-full rounded-lg border p-2"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm">Celular</label>
-                  <input
-                    value={celular}
-                    onChange={(e) => setCelular(e.target.value)}
-                    className="mt-1 w-full rounded-lg border p-2"
-                  />
-                </div>
-              </div>
-
-              {mensajeEnvio && (
-                <p
-                  className={`mt-3 text-sm ${
-                    mensajeEnvio.ok ? "text-emerald-700" : "text-amber-700"
-                  }`}
-                >
-                  {mensajeEnvio.text}
-                </p>
-              )}
-
-              <div className="mt-6 flex justify-end gap-2">
-                <button className="rounded-xl bg-neutral-100 px-3 py-2" onClick={onClose}>
-                  Cerrar
-                </button>
-                <button
-                  className="rounded-xl bg-black px-3 py-2 text-white disabled:opacity-60"
-                  onClick={verResultados}
-                  disabled={enviando}
-                >
-                  {enviando ? "Enviando..." : "Ver resultados"}
-                </button>
-              </div>
-            </>
-          )}
-
-          {mostrando && (
-            <>
-              <ResultadoPanel data={datos} total={total} />
-              <div className="mt-6 flex justify-end">
-                <button className="rounded-xl bg-neutral-100 px-3 py-2" onClick={onClose}>
-                  Cerrar
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
-
 /* ---------- App ---------- */
 export default function App() {
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
-  const [abrirModal, setAbrirModal] = useState(false);
-  const [yaAbrimos, setYaAbrimos] = useState(false); // para abrir una sola vez automática
+  const [modalAbierto, setModalAbierto] = useState(false);
 
   const total = useMemo(
     () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
     [respuestas]
   );
+
   const faltantes = useMemo(
     () => preguntas.filter((p) => respuestas[p.id] === undefined || respuestas[p.id] === null).length,
     [respuestas]
   );
 
-  useEffect(() => {
-    if (faltantes === 0 && !abrirModal && !yaAbrimos) {
-      setAbrirModal(true);
-      setYaAbrimos(true);
-    }
-  }, [faltantes, abrirModal, yaAbrimos]);
+  const data = rango(total);
 
   const setValor = (id: number, val: number) => {
     setRespuestas((prev) => ({ ...prev, [id]: val }));
@@ -297,30 +135,58 @@ export default function App() {
 
   const reiniciar = () => {
     setRespuestas({});
-    setYaAbrimos(false);
+    setModalAbierto(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
   const imprimir = () => window.print();
+
+  const exportarCSV = () => {
+    const encabezados = ["Pregunta", "Respuesta (2=Sí,1=Parcial,0=No)"];
+    const filas = preguntas.map((p) => [
+      p.texto.replace(/;/g, ","),
+      String(respuestas[p.id] ?? 0),
+    ]);
+    filas.push(["TOTAL", String(total)]);
+    const csv = [encabezados, ...filas].map((arr) => arr.join(";")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cuestionario_cleanway.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Abre el modal automáticamente cuando se contestan todas
+  useEffect(() => {
+    if (faltantes === 0) setModalAbierto(true);
+  }, [faltantes]);
 
   return (
     <>
-      {/* Fondo con imagen */}
+      {/* Fondo */}
       <div
-        className="fixed inset-0 -z-10 bg-[url('/Fondo.png')] bg-cover bg-center bg-no-repeat"
+        className="fixed inset-0 -z-10 bg-[url('/fondo_clean.png')] bg-cover bg-center bg-no-repeat"
         aria-hidden="true"
       />
-      {/* Velo (más transparente para ver MÁS el fondo) */}
-      <div className="fixed inset-0 -z-10 bg-white/40" aria-hidden="true" />
+      {/* Velo para que se lea mejor el contenido */}
+      <div className="fixed inset-0 -z-10 bg-white/55" aria-hidden="true" />
 
       <main className="mx-auto max-w-3xl p-6">
+        {/* Header */}
         <header className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/quokka-logo.png" alt="Grupo Quokka" className="h-10 sm:h-12" />
+              <img src="/CLEANWAY_logo.png" alt="Clean Way" className="h-10 sm:h-12" />
             </div>
 
             <div className="flex gap-2 print:hidden">
               <button onClick={reiniciar} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
                 Reiniciar
+              </button>
+              <button onClick={exportarCSV} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
+                Exportar CSV
               </button>
               <button onClick={imprimir} className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90">
                 Imprimir / PDF
@@ -328,16 +194,18 @@ export default function App() {
             </div>
           </div>
 
-          <h1 className="mt-4 text-2xl font-bold">¿Qué tan bueno es tu proveedor de transporte?</h1>
+          <h1 className="mt-4 text-2xl font-bold">
+            ¿Qué tan robusto es tu servicio de limpieza?
+          </h1>
           <p className="text-sm text-neutral-600">
-            ¡Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test!
+            Responde este diagnóstico y detecta brechas en certificación, control operativo y continuidad del servicio.
           </p>
-        </header>
 
-        <div className="mb-3 text-sm text-neutral-600">
-          Total: <span className="font-semibold">{total}</span> / 24 · Faltantes:{" "}
-          <span className="font-semibold">{faltantes}</span>
-        </div>
+          <div className="mt-3 text-sm text-neutral-600">
+            Total: <span className="font-semibold">{total}</span> / 24 ·{" "}
+            Faltantes: <span className="font-semibold">{faltantes}</span>
+          </div>
+        </header>
 
         {/* Preguntas */}
         <div className="space-y-4">
@@ -347,7 +215,11 @@ export default function App() {
                 {p.id}. {p.texto}
               </p>
               <div className="mt-2 flex gap-6">
-                {[{ label: "Sí", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map((opt) => (
+                {[
+                  { label: "Sí", val: 2 },
+                  { label: "Parcial", val: 1 },
+                  { label: "No", val: 0 },
+                ].map((opt) => (
                   <label key={opt.val} className="inline-flex items-center gap-2">
                     <input
                       type="radio"
@@ -364,11 +236,26 @@ export default function App() {
             </div>
           ))}
         </div>
-      </main>
 
-      {/* Modal automático al completar */}
-      <ModalContacto abierto={abrirModal} onClose={() => setAbrirModal(false)} total={total} />
+        {/* Modal de resultado (solo se ve cuando faltantes = 0) */}
+        <Modal open={modalAbierto} onClose={() => setModalAbierto(false)}>
+          <ResultadoPanel data={data} total={total} />
+          <div className="mt-4 flex justify-end gap-2 print:hidden">
+            <button
+              onClick={() => setModalAbierto(false)}
+              className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
+            >
+              Cerrar
+            </button>
+            <button
+              onClick={imprimir}
+              className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90"
+            >
+              Imprimir / PDF
+            </button>
+          </div>
+        </Modal>
+      </main>
     </>
   );
 }
-
