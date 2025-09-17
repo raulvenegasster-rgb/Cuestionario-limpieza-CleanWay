@@ -178,7 +178,7 @@ export default function App() {
         {/* Header */}
         <header className="mb-4">
           <div className="flex items-center justify-between">
-            <img src="/CLEANWAY_logo.png" alt="Clean Way" className="h-10 sm:h-12" />
+            <img src="/CLEANWAY_logo.png" alt="Clean Way" className="h-20 sm:h-24" />
             <div className="flex gap-2 print:hidden">
               <button onClick={reiniciar} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
                 Reiniciar
