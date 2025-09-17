@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 /* ---------- Tipos ---------- */
 type Pregunta = { id: number; texto: string };
@@ -67,12 +67,15 @@ function rango(total: number): Rango {
   return textos.alto;
 }
 
-/* ---------- Panel del resultado (lo usamos dentro del modal) ---------- */
+/* ---------- Panel del resultado ---------- */
 function ResultadoPanel({ data, total }: { data: Rango; total: number }) {
   return (
     <section className={`rounded-2xl p-5 ${data.bg}`}>
       <p className="text-sm font-semibold tracking-wide">
-        RESULTADO: <span className="ml-2 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold">{data.badge}</span>
+        RESULTADO:{" "}
+        <span className="ml-2 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold">
+          {data.badge}
+        </span>
         <span className="ml-2 text-neutral-500">| Total: {total} / 24</span>
       </p>
       <p className={`mt-3 font-bold ${data.tono}`}>{data.heading}</p>
@@ -81,7 +84,7 @@ function ResultadoPanel({ data, total }: { data: Rango; total: number }) {
   );
 }
 
-/* ---------- Modal de contacto + resultado ---------- */
+/* ---------- Modal contacto + gate de resultado ---------- */
 function ModalContacto({
   abierto,
   onClose,
@@ -92,20 +95,40 @@ function ModalContacto({
   total: number;
 }) {
   const datos = rango(total);
+
   const [nombre, setNombre] = useState("");
   const [puesto, setPuesto] = useState("");
   const [empresa, setEmpresa] = useState("");
   const [correo, setCorreo] = useState("");
   const [celular, setCelular] = useState("");
+
   const [enviando, setEnviando] = useState(false);
+  const [mostrando, setMostrando] = useState(false);
+  const [mensajeEnvio, setMensajeEnvio] = useState<null | { ok: boolean; text: string }>(null);
+
+  useEffect(() => {
+    if (!abierto) {
+      // reset al cerrar
+      setEnviando(false);
+      setMostrando(false);
+      setMensajeEnvio(null);
+      setNombre("");
+      setPuesto("");
+      setEmpresa("");
+      setCorreo("");
+      setCelular("");
+    }
+  }, [abierto]);
 
   if (!abierto) return null;
 
-  async function enviar() {
+  async function verResultados() {
     if (!nombre.trim() || !correo.trim()) {
       alert("Nombre y correo son obligatorios.");
       return;
     }
+
+    // intentamos enviar, pero no bloqueamos la visualización del resultado
     setEnviando(true);
     try {
       const resp = await fetch("/api/send", {
@@ -120,67 +143,126 @@ function ModalContacto({
           total,
         }),
       });
+
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) {
-        alert("No se pudo enviar. Intenta de nuevo.\n" + (data?.error || ""));
-        setEnviando(false);
-        return;
+        setMensajeEnvio({
+          ok: false,
+          text:
+            typeof data?.error === "string"
+              ? data.error
+              : data?.error
+              ? JSON.stringify(data.error)
+              : "No se pudo enviar.",
+        });
+      } else {
+        setMensajeEnvio({ ok: true, text: "¡Datos enviados!" });
       }
-      alert("¡Enviado! Gracias.");
-      onClose();
-    } catch (e) {
-      alert("No se pudo enviar. Intenta de nuevo.");
+    } catch (e: any) {
+      setMensajeEnvio({ ok: false, text: "No se pudo enviar." });
+    } finally {
       setEnviando(false);
+      setMostrando(true); // mostramos el resultado pase lo que pase
     }
   }
 
   return (
     <>
-      {/* fondo oscuro */}
       <div className="fixed inset-0 z-40 bg-black/50" />
-      {/* modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="w-full max-w-2xl rounded-2xl bg-white p-5 shadow-xl">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-lg font-semibold">Resultado del diagnóstico</h3>
-            <button className="rounded p-2 hover:bg-neutral-100" onClick={onClose}>✕</button>
-          </div>
-
-          <ResultadoPanel data={datos} total={total} />
-
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className="text-sm">Nombre*</label>
-              <input value={nombre} onChange={(e)=>setNombre(e.target.value)} className="mt-1 w-full rounded-lg border p-2" />
-            </div>
-            <div>
-              <label className="text-sm">Puesto</label>
-              <input value={puesto} onChange={(e)=>setPuesto(e.target.value)} className="mt-1 w-full rounded-lg border p-2" />
-            </div>
-            <div>
-              <label className="text-sm">Empresa</label>
-              <input value={empresa} onChange={(e)=>setEmpresa(e.target.value)} className="mt-1 w-full rounded-lg border p-2" />
-            </div>
-            <div>
-              <label className="text-sm">Correo*</label>
-              <input value={correo} onChange={(e)=>setCorreo(e.target.value)} type="email" className="mt-1 w-full rounded-lg border p-2" />
-            </div>
-            <div>
-              <label className="text-sm">Celular</label>
-              <input value={celular} onChange={(e)=>setCelular(e.target.value)} className="mt-1 w-full rounded-lg border p-2" />
-            </div>
-          </div>
-
-          <div className="mt-6 flex justify-end gap-2">
-            <button className="rounded-xl bg-neutral-100 px-3 py-2" onClick={onClose}>Cerrar</button>
-            <button
-              className="rounded-xl bg-black px-3 py-2 text-white disabled:opacity-60"
-              onClick={enviar}
-              disabled={enviando}
-            >
-              {enviando ? "Enviando..." : "Enviar y cerrar"}
+            <button className="rounded p-2 hover:bg-neutral-100" onClick={onClose}>
+              ✕
             </button>
           </div>
+
+          {!mostrando && (
+            <>
+              <p className="text-sm text-neutral-600">
+                Completa tus datos para ver el resultado.
+              </p>
+
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="text-sm">Nombre*</label>
+                  <input
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    className="mt-1 w-full rounded-lg border p-2"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm">Puesto</label>
+                  <input
+                    value={puesto}
+                    onChange={(e) => setPuesto(e.target.value)}
+                    className="mt-1 w-full rounded-lg border p-2"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm">Empresa</label>
+                  <input
+                    value={empresa}
+                    onChange={(e) => setEmpresa(e.target.value)}
+                    className="mt-1 w-full rounded-lg border p-2"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm">Correo*</label>
+                  <input
+                    value={correo}
+                    onChange={(e) => setCorreo(e.target.value)}
+                    type="email"
+                    className="mt-1 w-full rounded-lg border p-2"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm">Celular</label>
+                  <input
+                    value={celular}
+                    onChange={(e) => setCelular(e.target.value)}
+                    className="mt-1 w-full rounded-lg border p-2"
+                  />
+                </div>
+              </div>
+
+              {mensajeEnvio && (
+                <p
+                  className={`mt-3 text-sm ${
+                    mensajeEnvio.ok ? "text-emerald-700" : "text-amber-700"
+                  }`}
+                >
+                  {mensajeEnvio.text}
+                </p>
+              )}
+
+              <div className="mt-6 flex justify-end gap-2">
+                <button className="rounded-xl bg-neutral-100 px-3 py-2" onClick={onClose}>
+                  Cerrar
+                </button>
+                <button
+                  className="rounded-xl bg-black px-3 py-2 text-white disabled:opacity-60"
+                  onClick={verResultados}
+                  disabled={enviando}
+                >
+                  {enviando ? "Enviando..." : "Ver resultados"}
+                </button>
+              </div>
+            </>
+          )}
+
+          {mostrando && (
+            <>
+              <ResultadoPanel data={datos} total={total} />
+              <div className="mt-6 flex justify-end">
+                <button className="rounded-xl bg-neutral-100 px-3 py-2" onClick={onClose}>
+                  Cerrar
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>
@@ -191,6 +273,7 @@ function ModalContacto({
 export default function App() {
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
   const [abrirModal, setAbrirModal] = useState(false);
+  const [yaAbrimos, setYaAbrimos] = useState(false); // para abrir una sola vez automática
 
   const total = useMemo(
     () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
@@ -201,26 +284,31 @@ export default function App() {
     [respuestas]
   );
 
+  useEffect(() => {
+    if (faltantes === 0 && !abrirModal && !yaAbrimos) {
+      setAbrirModal(true);
+      setYaAbrimos(true);
+    }
+  }, [faltantes, abrirModal, yaAbrimos]);
+
   const setValor = (id: number, val: number) => {
     setRespuestas((prev) => ({ ...prev, [id]: val }));
   };
 
-  const reiniciar = () => setRespuestas({});
-  const imprimir = () => window.print();
-
-  const verResultado = () => {
-    if (faltantes > 0) {
-      alert(`Te faltan ${faltantes} preguntas por contestar.`);
-      return;
-    }
-    setAbrirModal(true);
+  const reiniciar = () => {
+    setRespuestas({});
+    setYaAbrimos(false);
   };
+  const imprimir = () => window.print();
 
   return (
     <>
       {/* Fondo con imagen */}
-      <div className="fixed inset-0 -z-10 bg-[url('/Fondo.png')] bg-cover bg-center bg-no-repeat" aria-hidden="true" />
-      {/* Velo (transparente) */}
+      <div
+        className="fixed inset-0 -z-10 bg-[url('/Fondo.png')] bg-cover bg-center bg-no-repeat"
+        aria-hidden="true"
+      />
+      {/* Velo (más transparente para ver MÁS el fondo) */}
       <div className="fixed inset-0 -z-10 bg-white/40" aria-hidden="true" />
 
       <main className="mx-auto max-w-3xl p-6">
@@ -237,56 +325,9 @@ export default function App() {
               <button onClick={imprimir} className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90">
                 Imprimir / PDF
               </button>
-              <button
-                onClick={verResultado}
-                className="rounded-xl bg-emerald-600 px-3 py-2 text-white shadow hover:opacity-90 disabled:opacity-60"
-                disabled={faltantes > 0}
-              >
-                Ver resultado
-              </button>
             </div>
           </div>
 
           <h1 className="mt-4 text-2xl font-bold">¿Qué tan bueno es tu proveedor de transporte?</h1>
           <p className="text-sm text-neutral-600">
-            ¡Encuentra las debilidades y fortalezas de tu servicio de transporte con este sencillo test!
-          </p>
-        </header>
-
-        <div className="mb-3 text-sm text-neutral-600">
-          Total: <span className="font-semibold">{total}</span> / 24 · Faltantes:{" "}
-          <span className="font-semibold">{faltantes}</span>
-        </div>
-
-        {/* Preguntas */}
-        <div className="space-y-4">
-          {preguntas.map((p) => (
-            <div key={p.id} className="rounded-xl border bg-white/90 p-4 shadow">
-              <p className="font-medium">
-                {p.id}. {p.texto}
-              </p>
-              <div className="mt-2 flex gap-6">
-                {[{ label: "Sí", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map((opt) => (
-                  <label key={opt.val} className="inline-flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name={`q_${p.id}`}
-                      value={opt.val}
-                      checked={respuestas[p.id] === opt.val}
-                      onChange={() => setValor(p.id, opt.val)}
-                      className="h-4 w-4"
-                    />
-                    <span>{opt.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </main>
-
-      {/* Modal (resultado + formulario) */}
-      <ModalContacto abierto={abrirModal} onClose={() => setAbrirModal(false)} total={total} />
-    </>
-  );
-}
+            ¡Encuentra las debilidades y fortalezas
