@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+// src/App.tsx
+import { useMemo, useState, useEffect } from "react";
 
 /* ---------- Tipos ---------- */
 type Pregunta = { id: number; texto: string };
@@ -11,19 +12,19 @@ type Rango = {
   detail: string;
 };
 
-/* ---------- Preguntas (Clean Way) ---------- */
+/* ---------- Preguntas (12) ---------- */
 const preguntas: Pregunta[] = [
-  { id: 1, texto: "¿Cuentas con un programa de limpieza certificado (p. ej. ISO 9001)?" },
-  { id: 2, texto: "¿Tu proveedor garantiza la asistencia para que la operación nunca se detenga?" },
-  { id: 3, texto: "¿Existen rutas y checklists documentados por tipo de área (oficina, industria, retail, salud, educación)?" },
-  { id: 4, texto: "¿Se ejecutan auditorías internas con evidencia (bitácoras/fotos) y acciones correctivas?" },
-  { id: 5, texto: "¿Tienes abastecimiento continuo de insumos con opciones biodegradables?" },
-  { id: 6, texto: "¿Cuentas con planes de contingencia para ausencias e incidencias críticas?" },
-  { id: 7, texto: "¿Monitoreas indicadores por zona/turno (cumplimiento, retrabajos, quejas)?" },
-  { id: 8, texto: "¿La supervisión realiza rondines digitales con evidencia fotográfica?" },
-  { id: 9, texto: "¿El personal tiene capacitación vigente (químicos, EPP, seguridad e higiene)?" },
-  { id: 10, texto: "¿Existen protocolos para áreas sensibles (salud, laboratorios, alimentos) y control de accesos?" },
-  { id: 11, texto: "¿Tienes trazabilidad de incidencias y tiempos de respuesta (SLA/SLT)?" },
+  { id: 1,  texto: "¿Cuentas con un programa de limpieza certificado (p. ej. ISO 9001)?" },
+  { id: 2,  texto: "¿Tu proveedor garantiza la asistencia para que la operación nunca se detenga?" },
+  { id: 3,  texto: "¿Existen rutas y checklists documentados por tipo de área (oficina, industria, retail, salud, educación)?" },
+  { id: 4,  texto: "¿Se ejecutan auditorías internas con evidencia (bitácoras/fotos) y acciones correctivas?" },
+  { id: 5,  texto: "¿Tienes abastecimiento continuo de insumos con opciones biodegradables?" },
+  { id: 6,  texto: "¿Se controla el orden y la seguridad (EPP, 5S) del personal de limpieza?" },
+  { id: 7,  texto: "¿Monitoreas indicadores por zona/turno (cumplimiento, retrabajos, quejas)?" },
+  { id: 8,  texto: "¿Se documenta la trazabilidad de incidencias y tiempos de respuesta (SLA/SLT)?" },
+  { id: 9,  texto: "¿Recibes reporte operativo diario (avances, hallazgos, horas-hombre, consumo de insumos)?" },
+  { id: 10, texto: "¿Recibes propuestas de mejora y seguimiento a la implementación/cierre?" },
+  { id: 11, texto: "¿Cumple con requisitos legales/seguridad del cliente y está disponible para auditorías?" },
   { id: 12, texto: "¿Cuentas con escalamiento 24/7 y atención ejecutiva para resolver desviaciones?" },
 ];
 
@@ -43,21 +44,19 @@ const textos: Record<"bajo" | "medio" | "alto", Rango> = {
     badge: "Regular",
     tono: "text-amber-700",
     bg: "bg-amber-50",
-    heading: "⚠️ Hay brechas que atender.",
+    heading: "⚠️ Hay brechas que resolver.",
     detail:
-      "Existen avances, pero se observan brechas en estandarización por tipo de área, evidencia de cumplimiento, indicadores, " +
-      "y respuesta a incidencias. Corregirlas reduce retrabajos y quejas, y evita hallazgos en auditorías. " +
-      "Implementa rutas, checklists, rondines con evidencia y escalamiento claro.",
+      "Existen áreas con cumplimiento parcial en checklists, disciplina de turno y trazabilidad de incidencias. " +
+      "Cerrar estas brechas reduce quejas, retrabajos y costos de abastecimiento, y mejora la experiencia del usuario final.",
   },
   alto: {
     badge: "Sólido",
     tono: "text-emerald-700",
     bg: "bg-emerald-50",
-    heading: "🚿 Tienes un servicio de limpieza sólido.",
+    heading: "✨ Operación de limpieza sólida.",
     detail:
-      "¡Muy bien! Tienes certificación y/o programa formal, cobertura de asistencia garantizada, rutas y checklists por tipo de área, " +
-      "auditorías internas con evidencia, abastecimiento con opciones biodegradables, indicadores por zona y escalamiento 24/7. " +
-      "Esto asegura continuidad operativa, higiene y cumplimiento ante auditorías.",
+      "Cuentas con certificación, cobertura estable, indicadores por zona, trazabilidad y propuestas de mejora implementadas. " +
+      "Sigue monitoreando KPIs y auditorías para mantener el nivel.",
   },
 } as const;
 
@@ -69,61 +68,27 @@ function rango(total: number): Rango {
 }
 
 /* ---------- Panel de resultado ---------- */
-function ResultadoPanel({ data, total }: { data: Rango; total: number }) {
+function ResultadoPanel({ data }: { data: Rango }) {
   return (
-    <section className={`rounded-2xl p-5 ${data.bg}`}>
-      <div className="flex items-center gap-2 text-xs text-neutral-600">
-        <p className="font-semibold text-neutral-800">RESULTADO:</p>
+    <section className={`mt-4 rounded-2xl p-5 ${data.bg}`}>
+      <p className="text-sm font-semibold tracking-wide">RESULTADO:</p>
+      <p className="mt-1">
         <span
-          className={`inline-flex items-center rounded-full border px-2 py-0.5 font-semibold ${data.tono}`}
+          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${data.tono}`}
         >
           {data.badge}
         </span>
-        <span className="ml-auto">| Total: {total} / 24</span>
-      </div>
-
+      </p>
       <p className={`mt-3 font-bold ${data.tono}`}>{data.heading}</p>
       <p className="mt-2">{data.detail}</p>
     </section>
   );
 }
 
-/* ---------- Modal simple ---------- */
-function Modal({
-  open,
-  onClose,
-  children,
-  title,
-}: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-}) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4">
-      <div className="mx-auto mt-20 w-full max-w-2xl rounded-2xl bg-white p-5 shadow-2xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button
-            onClick={onClose}
-            className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100"
-            aria-label="Cerrar"
-          >
-            ✕
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
-
 /* ---------- App ---------- */
 export default function App() {
+  // respuestas y cálculo
   const [respuestas, setRespuestas] = useState<Record<number, number | null>>({});
-  const [openModal, setOpenModal] = useState(false);
 
   const total = useMemo(
     () => preguntas.reduce((acc, p) => acc + (respuestas[p.id] ?? 0), 0),
@@ -137,18 +102,53 @@ export default function App() {
 
   const data = rango(total);
 
-  const setValor = (id: number, val: number) => {
-    setRespuestas((prev) => ({ ...prev, [id]: val }));
-  };
+  // modal de resultado
+  const [showModal, setShowModal] = useState(false);
 
-  const reiniciar = () => {
+  useEffect(() => {
+    if (faltantes === 0) setShowModal(true);
+  }, [faltantes]);
+
+  // formulario de contacto
+  const [nombre, setNombre] = useState("");
+  const [puesto, setPuesto] = useState("");
+  const [empresa, setEmpresa] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [celular, setCelular] = useState("");
+  const [enviando, setEnviando] = useState(false);
+
+  async function enviar() {
+    try {
+      setEnviando(true);
+      const res = await fetch("/api/send", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          nombre,
+          puesto,
+          empresa,
+          correo,
+          celular,
+          total,
+          respuestas,
+        }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j?.error || "Error al enviar");
+      alert("¡Enviado! Te contactaremos pronto.");
+    } catch (err: any) {
+      alert(`No se pudo enviar. Intenta de nuevo.\n${err?.message || err}`);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  function reiniciar() {
     setRespuestas({});
-    setOpenModal(false);
-  };
+    setShowModal(false);
+  }
 
-  const imprimir = () => window.print();
-
-  const exportarCSV = () => {
+  function exportarCSV() {
     const encabezados = ["Pregunta", "Respuesta (2=Sí,1=Parcial,0=No)"];
     const filas = preguntas.map((p) => [
       p.texto.replace(/;/g, ","),
@@ -160,61 +160,39 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "cuestionario_limpieza_cleanway.csv";
+    a.download = "cuestionario_limpieza.csv";
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  // Abre el modal automáticamente cuando se completen todas las preguntas
-  useEffect(() => {
-    if (faltantes === 0 && preguntas.length > 0) {
-      setOpenModal(true);
-    }
-  }, [faltantes]);
+  }
 
   return (
     <>
-      {/* Fondo desde /public */}
+      {/* Fondo e imagen */}
       <div
         className="fixed inset-0 -z-10 bg-[url('/fondo_clean.png')] bg-cover bg-center bg-no-repeat"
         aria-hidden="true"
       />
-      {/* Velo opcional para mejorar legibilidad (ajusta el /40 a tu gusto) */}
-      <div className="fixed inset-0 -z-10 bg-white/50" aria-hidden="true" />
+      <div className="fixed inset-0 -z-10 bg-white/45" aria-hidden="true" />
 
       <main className="mx-auto max-w-3xl p-6">
-        {/* Header con logo y acciones */}
-        <header className="mb-6">
+        {/* Header */}
+        <header className="mb-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src="/CLEANWAY_logo.png" alt="Clean Way" className="h-24 sm:h-28" />
-            </div>
-
+            <img src="/CLEANWAY_logo.png" alt="Clean Way" className="h-10 sm:h-12" />
             <div className="flex gap-2 print:hidden">
-              <button
-                onClick={reiniciar}
-                className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
-              >
+              <button onClick={reiniciar} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
                 Reiniciar
               </button>
-              <button
-                onClick={exportarCSV}
-                className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
-              >
+              <button onClick={exportarCSV} className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50">
                 Exportar CSV
               </button>
-              <button
-                onClick={imprimir}
-                className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90"
-              >
+              <button onClick={() => window.print()} className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90">
                 Imprimir / PDF
               </button>
             </div>
           </div>
 
-          <h1 className="mt-4 text-2xl font-bold">
-            ¿Qué tan robusto es tu servicio de limpieza?
-          </h1>
+          <h1 className="mt-4 text-2xl font-bold">¿Qué tan robusto es tu servicio de limpieza?</h1>
           <p className="text-sm text-neutral-600">
             Responde este diagnóstico y detecta brechas en certificación, control operativo y continuidad del servicio.
           </p>
@@ -234,56 +212,115 @@ export default function App() {
                 {p.id}. {p.texto}
               </p>
               <div className="mt-2 flex gap-6">
-                {[{ label: "Sí", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map(
-                  (opt) => (
-                    <label key={opt.val} className="inline-flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name={`q_${p.id}`}
-                        value={opt.val}
-                        checked={respuestas[p.id] === opt.val}
-                        onChange={() => setValor(p.id, opt.val)}
-                        className="h-4 w-4"
-                      />
-                      <span>{opt.label}</span>
-                    </label>
-                  )
-                )}
+                {[{ label: "Sí", val: 2 }, { label: "Parcial", val: 1 }, { label: "No", val: 0 }].map((opt) => (
+                  <label key={opt.val} className="inline-flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name={`q_${p.id}`}
+                      value={opt.val}
+                      checked={respuestas[p.id] === opt.val}
+                      onChange={() => setRespuestas((prev) => ({ ...prev, [p.id]: opt.val }))}
+                      className="h-4 w-4"
+                    />
+                    <span>{opt.label}</span>
+                  </label>
+                ))}
               </div>
             </div>
           ))}
         </div>
-      </main>
 
-      {/* Modal de resultado */}
-      <Modal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        title="Resultado del diagnóstico"
-      >
-        <ResultadoPanel data={data} total={total} />
-        <div className="mt-5 flex justify-end gap-2 print:hidden">
-          <button
-            onClick={() => setOpenModal(false)}
-            className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
-          >
-            Cerrar
-          </button>
-          <button
-            onClick={imprimir}
-            className="rounded-xl bg-black px-3 py-2 text-white shadow hover:opacity-90"
-          >
-            Imprimir / PDF
-          </button>
-          <button
-            onClick={reiniciar}
-            className="rounded-xl bg-neutral-900 px-3 py-2 text-white shadow hover:bg-neutral-800"
-          >
-            Reiniciar cuestionario
-          </button>
-        </div>
-      </Modal>
+        {/* Modal de resultado + formulario */}
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="w-full max-w-2xl rounded-2xl bg-white p-5 shadow-xl">
+              <div className="flex items-start justify-between">
+                <h2 className="text-lg font-semibold">Resultado del diagnóstico</h2>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100"
+                  aria-label="Cerrar"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <ResultadoPanel data={data} />
+
+              {/* Formulario de contacto */}
+              <div className="mt-5 rounded-xl border bg-white p-4">
+                <p className="mb-3 text-sm text-neutral-700">
+                  ¿Quieres que te contactemos con una propuesta? Déjanos tus datos:
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <input
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    placeholder="Nombre*"
+                    className="rounded-lg border px-3 py-2 outline-none"
+                  />
+                  <input
+                    value={puesto}
+                    onChange={(e) => setPuesto(e.target.value)}
+                    placeholder="Puesto"
+                    className="rounded-lg border px-3 py-2 outline-none"
+                  />
+                  <input
+                    value={empresa}
+                    onChange={(e) => setEmpresa(e.target.value)}
+                    placeholder="Empresa"
+                    className="rounded-lg border px-3 py-2 outline-none"
+                  />
+                  <input
+                    value={correo}
+                    onChange={(e) => setCorreo(e.target.value)}
+                    placeholder="Correo*"
+                    type="email"
+                    className="rounded-lg border px-3 py-2 outline-none"
+                  />
+                  <input
+                    value={celular}
+                    onChange={(e) => setCelular(e.target.value)}
+                    placeholder="Celular"
+                    className="rounded-lg border px-3 py-2 outline-none sm:col-span-2"
+                  />
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
+                  >
+                    Cerrar
+                  </button>
+                  <button
+                    onClick={() => window.print()}
+                    className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
+                  >
+                    Imprimir / PDF
+                  </button>
+                  <button
+                    onClick={reiniciar}
+                    className="rounded-xl bg-white px-3 py-2 shadow hover:bg-neutral-50"
+                  >
+                    Reiniciar cuestionario
+                  </button>
+
+                  <button
+                    onClick={enviar}
+                    disabled={enviando || !correo || !nombre}
+                    className="ml-auto rounded-xl bg-black px-4 py-2 text-white shadow hover:opacity-90 disabled:opacity-50"
+                  >
+                    {enviando ? "Enviando..." : "Enviar datos"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </>
   );
 }
+
 
