@@ -136,7 +136,7 @@ export default function App() {
       />
       {/* Velo más transparente para que se vea MÁS el fondo */}
       <div
-        className="fixed inset-0 -z-10 bg-white/60 backdrop-blur-[1px]"
+        className="fixed inset-0 -z-10 bg-white/40 backdrop-blur-[0px]"
         aria-hidden="true"
       />
 
